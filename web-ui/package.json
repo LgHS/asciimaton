@@ -20,19 +20,25 @@
     "bootstrap-sass": "3.3.7",
     "css-hot-loader": "1.1.1",
     "css-loader": "0.28.4",
+    "express": "^4.15.4",
     "extract-text-webpack-plugin": "2.1.0",
     "file-loader": "0.11.2",
     "image-webpack-loader": "^3.4.2",
+    "mobx": "^3.3.0",
     "node-sass": "4.5.3",
     "react": "15.5.4",
     "react-dom": "15.5.4",
     "react-hot-loader": "3.0.0-beta.7",
     "react-router-dom": "^4.2.2",
     "sass-loader": "^6.0.6",
+    "socket.io": "^2.0.3",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "url-loader": "0.5.8",
     "webpack": "2.6.1",
     "webpack-dev-server": "2.4.5"
+  },
+  "dependencies": {
+    "socket.io-client": "^2.0.3"
   }
 }

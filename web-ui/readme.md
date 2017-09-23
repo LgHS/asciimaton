@@ -12,3 +12,8 @@ Made with Reactjs.
 
 - `yarn` or `npm install`
 - `npm run build`
+
+## Test
+
+Test socketio server with `node ./test/node-socketio-server.js`.
+It will instanciate a socket on `localhost:4200`.
