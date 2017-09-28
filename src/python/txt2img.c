@@ -6,15 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" {
 #include "algo_txt2img.h"
-}
 
 #include "txt2img.h"
 
 //---------------------------------------------------------------------
 uint8_t *txt2img(
-        char *txt,
+        const char *txt,
         size_t txt_w,
         size_t txt_h,
         size_t *pix_w,

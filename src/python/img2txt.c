@@ -6,10 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" {
 #include "algo_img2txt.h"
-}
-
 #include "img2txt.h"
 
 //---------------------------------------------------------------------

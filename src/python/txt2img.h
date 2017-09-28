@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 uint8_t *txt2img(
-        char *txt,
+        const char *txt,
         size_t txt_w,
         size_t txt_h,
         size_t *pix_w,

@@ -10,14 +10,14 @@
 #include "algo_txt2img.h"
 #include "font.c"
 
-void txt2img_convert(uint8_t *out_data, char *in_data, size_t in_w, size_t in_h)
+void txt2img_convert(uint8_t *out_data, const char *in_data, size_t in_w, size_t in_h)
 {
 	size_t out_stride = in_w * TXT2IMG_CHAR_W;
 	for ( size_t y = 0; y < in_h; y++ )
 	{
 		for ( size_t x = 0; x < in_w; x++ )
 		{
-			char c = in_data[y * in_w + x];
+			char c = in_data[y * (in_w+1) + x];
 			for ( size_t i = 0; i < TXT2IMG_CHAR_H; i++ )
 			{
 				for ( size_t j = 0; j < TXT2IMG_CHAR_W; j++ )
