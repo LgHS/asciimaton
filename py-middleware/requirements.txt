@@ -1,0 +1,3 @@
+eventlet
+Flask-SocketIO
+RPi.GPIO
