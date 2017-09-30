@@ -19,7 +19,7 @@ font.c: font.pgm fonter fonter.o pgm.c pgm.h
 	./fonter $< > $@
 
 asciimaton.so: asciimatonmodule.c algo_img2txt.o img2txt.o algo_txt2img.o txt2img.o
-	$(CC) -shared -o $@ $^ -Wall `python2.7-config --cflags --ldflags`
+	$(CC) -shared -o $@ $^ -Wall `python3-config --cflags --ldflags`
 
 algo_img2txt.o: algo_img2txt.c weights.c
 algo_txt2img.o: algo_txt2img.c font.c

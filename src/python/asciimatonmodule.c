@@ -46,7 +46,7 @@ asciimaton_img2txt(PyObject *self, PyObject *args)
 	pgm = next_line(pgm);
 
 	txt = img2txt((uint8_t *) pgm, pgm_w, pgm_h, &txt_w, &txt_h, 6.0, "footer");
-	ret = PyString_FromString(txt);
+	ret = PyBytes_FromString(txt);
 	free(txt);
 
 	return ret;
@@ -87,9 +87,9 @@ asciimaton_txt2img(PyObject *self, PyObject *args)
 	         "%zd %zd\n"
 	         "255\n", pix_w, pix_h);
 
-	ret = PyString_FromString(header);
-	pgm_body = PyString_FromStringAndSize((const char *) pix, pix_h * pix_w);
-	PyString_ConcatAndDel(&ret, pgm_body);
+	ret = PyBytes_FromString(header);
+	pgm_body = PyBytes_FromStringAndSize((const char *) pix, pix_h * pix_w);
+	PyBytes_ConcatAndDel(&ret, pgm_body);
 	free(pix);
 
 	return ret;
@@ -101,9 +101,24 @@ static PyMethodDef asciimaton_methods[] = {
 	{ NULL, NULL, 0, NULL },
 };
 
+static PyModuleDef asciimaton_moduledef = {
+	PyModuleDef_HEAD_INIT,
+	"asciimaton",
+	NULL,
+	0,
+	asciimaton_methods,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};
+
 PyMODINIT_FUNC
-initasciimaton(void)
+PyInit_asciimaton(void)
 {
+	PyObject *module = PyModule_Create(&asciimaton_moduledef);
+
 	img2txt_fix_weights();
-	Py_InitModule("asciimaton", asciimaton_methods);
+
+	return module;
 }
