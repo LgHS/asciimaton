@@ -114,9 +114,9 @@ def on_webcam_processing(json):
 	# print('txt2img done!')
 
 	with open('current.txt', 'w', encoding='utf-8') as f:
-		f.write(text)
+		f.write(txt.decode('utf-8'))
 
-	emit('asciimaton.output', {'picture': base64.b64encode(new_pgm)})
+	emit('asciimaton.output', {'picture': base64.b64encode(new_pgm).decode('utf-8')})
 
 
 @socketio.on('led.changeState')
