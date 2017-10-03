@@ -1,3 +1,5 @@
+import base64
+import datetime
 from enum import Enum
 from time import sleep
 
@@ -77,6 +79,10 @@ def test():
 	new_pgm = asciimaton.txt2img(txt)
 	with open('static/test.pgm', 'wb') as f:
 		f.write(new_pgm)
+
+	# with open('/dev/usb/lp0', "wb") as f:
+	#	f.write(txt)
+
 	return 'henlo!'
 
 
@@ -92,12 +98,25 @@ def on_connect():
 
 @socketio.on('webcam.output')
 def on_webcam_processing(json):
-	img = json['picture']
-	print('webcam.output', img)
+	pgm = base64.b64decode(
+		json['picture']
+	)
 
-	# Inset ASCIImaton's processing here
+	# with open('static/lena420.pgm', 'rb') as f:
+	#	foo = f.read()
+	# print(pgm == foo)
 
-	emit('asciimaton.output', {'picture': img})
+	print('webcam.output')
+
+	txt = asciimaton.img2txt(pgm)
+	# print('img2txt done!')
+	new_pgm = asciimaton.txt2img(txt)
+	# print('txt2img done!')
+
+	with open('current.txt', 'w', encoding='utf-8') as f:
+		f.write(text)
+
+	emit('asciimaton.output', {'picture': base64.b64encode(new_pgm)})
 
 
 @socketio.on('led.changeState')
@@ -112,8 +131,19 @@ def on_led_state_change(json):
 @socketio.on('printer.print')
 def on_printer_print(json):
 	# {'save': True|False}
-	# TODO
-	pass
+	print('printer.print', json)
+
+	save = json['save']
+
+	with open('current.txt', 'r', encoding='utf-8') as txt_file:
+		with open('/dev/usb/lp0', "wb") as printer:
+			txt = txt_file.read()
+			printer.write(txt)
+
+		if save:
+			filename = '/upload/{:%Y-%m-%d %H:%M:%S}.txt'.format(datetime.datetime.now())
+			with open(filename, 'w', encoding='utf-8') as f:
+				f.write(txt)
 
 
 if __name__ == '__main__':
