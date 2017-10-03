@@ -32,8 +32,8 @@ class Communication extends React.Component {
     }
 
     this._updateLeds(nextProps.stateMachine.leds);
-    console.log('update leds', nextProps.stateMachine.leds);
 
+    // update callback when button is pressed based on new state
     socket.removeAllListeners("button.isPressed");
     socket.on('button.isPressed', (data) => {
       if(COLORS.includes(data.color)) {
