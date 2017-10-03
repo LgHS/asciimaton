@@ -6,16 +6,18 @@ body {
   font-family: monospace;
 }
 
-.app__nav {
+.debugbar {
   background-color: rgb(0, 255, 0);
   bottom: 0;
   color: black;
   position: absolute;
   right: 0;
 
-  a {
-    display: inline-block;
-    padding: 5px 10px;
+  &__nav {
+    a {
+      display: inline-block;
+      padding: 5px 10px;
+    }
   }
 }
 

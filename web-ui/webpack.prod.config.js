@@ -12,7 +12,7 @@ module.exports = {
   ],
   output: {
     filename: 'main.js',
-    path: resolve(__dirname, 'dist')
+    path: resolve(__dirname, 'build/static')
   },
   devtool: false,
   module: {
@@ -45,7 +45,7 @@ module.exports = {
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
         use: [
-          'file-loader?name=[name].[ext]&outputPath=images/',
+          'file-loader?name=[name].[ext]&outputPath=images/&publicPath=static/',
           'image-webpack-loader'
         ]
       }
