@@ -5,9 +5,14 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit
 
 try:
+	import asciimaton
+except ImportError as e:
+	print('Failed to load asciimaton')
+
+try:
     import RPi.GPIO as GPIO
 except RuntimeError:
-    print('-- Not on a Raspberry Pi! Emulating env...')
+    print('-- Not on a Raspberry Pi! Emulating env... (WIP)')
     print()
 
     GPIO = None
@@ -48,6 +53,7 @@ class GPIOHandler:
         print("Initializing GPIO")
 
         GPIO.setmode(GPIO.BCM)
+        # GPIO.setmode(GPIO.BOARD)
 
         # Init to HIGH for testing purpose
         GPIO.setup([p.value for p in PI_OUT], GPIO.OUT, initial=GPIO.HIGH)
@@ -66,6 +72,11 @@ class GPIOHandler:
 
 @app.route('/test/')
 def test():
+	pgm = open("static/lena420.pgm", "rb").read()
+	txt = asciimaton.img2txt(pgm)
+	new_pgm = asciimaton.txt2img(txt)
+	with open('static/test.pgm', 'wb') as f:
+		f.write(new_pgm)
 	return 'henlo!'
 
 
@@ -100,13 +111,7 @@ def on_led_state_change(json):
 
 @socketio.on('printer.print')
 def on_printer_print(json):
-	# {}
-	# TODO
-	pass
-
-@socketio.on('asciimaton.save')
-def on_save(json):
-	# {}
+	# {'save': True|False}
 	# TODO
 	pass
 
@@ -116,6 +121,7 @@ if __name__ == '__main__':
         GPIOHandler.init(GPIO)
 
         print("Starting websocket server")
-        socketio.run(app, host='192.168.12.182', port='54321', debug=True)
+        socketio.run(app, host='192.168.12.182', port='54321')
+        # socketio.run(app, host='192.168.12.182', port='54321', debug=True)
     finally:
         GPIO.cleanup()

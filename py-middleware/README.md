@@ -9,7 +9,8 @@ pip install -r requirements.txt
 sudo adduser pi gpio
 cd ../src/python
 make
-mv asciimaton.so ../../py-middleware/asciimaton.so```
+mv asciimaton.so ../../py-middleware/asciimaton.so
+```
 
 
 ## How To
