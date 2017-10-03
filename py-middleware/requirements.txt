@@ -1,3 +1,4 @@
 eventlet
 Flask-SocketIO
 RPi.GPIO
+Pillow

@@ -1,10 +1,12 @@
 import base64
 import datetime
+import io
 from enum import Enum
 from time import sleep
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit
+from PIL import Image
 
 try:
 	import asciimaton
@@ -98,13 +100,26 @@ def on_connect():
 
 @socketio.on('webcam.output')
 def on_webcam_processing(json):
-	pgm = base64.b64decode(
+	img = base64.b64decode(
 		json['picture']
 	)
 
 	# with open('static/lena420.pgm', 'rb') as f:
 	#	foo = f.read()
 	# print(pgm == foo)
+
+	# TODO: Doesn't work yet
+	CONVERT = False
+
+	if CONVERT:
+		with io.BytesIO() as output:
+			img = Image.open(io.BytesIO(img))
+			# img.convert('RGB')
+			img.save(output, 'PPM')  # Format for .pgm
+
+			pgm = output.getvalue()
+	else:
+		pgm = img
 
 	print('webcam.output')
 
@@ -115,6 +130,10 @@ def on_webcam_processing(json):
 
 	with open('current.txt', 'w', encoding='utf-8') as f:
 		f.write(txt.decode('utf-8'))
+
+	# Test
+	with open('static/current.pgm', 'wb') as f:
+		f.write(new_pgm)
 
 	emit('asciimaton.output', {'picture': base64.b64encode(new_pgm).decode('utf-8')})
 
@@ -135,6 +154,7 @@ def on_printer_print(json):
 
 	save = json['save']
 
+	# TODO: Use copy instead? :)
 	with open('current.txt', 'r', encoding='utf-8') as txt_file:
 		with open('/dev/usb/lp0', "wb") as printer:
 			txt = txt_file.read()
