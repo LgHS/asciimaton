@@ -70,7 +70,7 @@ asciimaton_txt2img(PyObject *self, PyObject *args)
 	if ( !PyArg_ParseTuple(args, "s#", &txt, &length) )
 		return NULL;
 
-	for ( const char *p = txt; *p != '\0'; p++ )
+	for ( const char *p = txt; *p != '\0'; )
 	{
 		p = next_line(p);
 		if ( txt_w == 0 )
