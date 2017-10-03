@@ -67,8 +67,9 @@ char *img2txt(
 
 	// convert
 	size_t out_size = ((*txt_w) + 1 /* \n */) * (*txt_h);
-	char *out_buf = (char *) malloc(out_size);
+	char *out_buf = (char *) malloc(out_size+1);
 	img2txt_convert(out_buf, pix, pix_w, pix_h, factor);
+	out_buf[out_size] = '\0';
 
 	// write footer
 	write_footer(out_buf, *txt_w, *txt_h, footer);
