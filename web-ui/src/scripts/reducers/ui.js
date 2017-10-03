@@ -2,8 +2,12 @@ import * as actions from "../actions/actions";
 
 const initialState = {
   godMode: false,
-  settingsModalOpened: false,
-  isSocketConnected: false
+  isSettingsModalOpened: false,
+  isSocketConnected: false,
+  socketServer: {
+    url: 'localhost',
+    port: '54321'
+  }
 };
 
 const ui = (state = initialState, action) => {
@@ -11,13 +15,13 @@ const ui = (state = initialState, action) => {
     case actions.OPEN_SETTINGS:
       return {
         ...state,
-        settingsModalOpened: true
+        isSettingsModalOpened: true
       };
       break;
     case actions.CLOSE_SETTINGS:
       return {
         ...state,
-        settingsModalOpened: false
+        isSettingsModalOpened: false
       };
       break;
     case actions.ENTER_GOD_MODE:
@@ -38,6 +42,11 @@ const ui = (state = initialState, action) => {
         isSocketConnected: action.isSocketConnected
       };
       break;
+    case actions.UPDATE_SOCKET_SETTINGS:
+      return {
+        ...state,
+        socketServer: action.serverData
+      }
   }
   return state;
 };

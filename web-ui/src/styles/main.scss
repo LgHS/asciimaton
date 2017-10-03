@@ -1,5 +1,7 @@
 @import 'tools/reset';
 
+@import 'components/modal';
+
 body {
   background-color: black;
   color: white;
@@ -34,8 +36,6 @@ main {
   width: 100vw;
 
   .logo {
-    //background: url('../assets/images/logo.png') no-repeat;
-    //background-size: contain;
     width: 423px;
     height: 226px;
   }

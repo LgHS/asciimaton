@@ -4,6 +4,7 @@ export const ENTER_GOD_MODE = "ENTER_GOD_MODE";
 export const EXIT_GOD_MODE = "EXIT_GOD_MODE";
 export const SET_SOCKET_CONNECTED = "SET_SOCKET_CONNECTED";
 export const CHANGE_STATE = "CHANGE_STATE";
+export const UPDATE_SOCKET_SETTINGS = "UPDATE_SOCKET_SETTINGS";
 
 export function openSettings() {
   return { type: OPEN_SETTINGS };
@@ -29,5 +30,12 @@ export function changeState(nextState) {
   return {
     type: CHANGE_STATE,
     state: nextState
+  }
+}
+
+export function updateSocketSettings(serverData) {
+  return {
+    type: UPDATE_SOCKET_SETTINGS,
+    serverData
   }
 }

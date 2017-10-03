@@ -6,6 +6,7 @@ import {Route} from "react-router-dom";
 import React from "react";
 import Communication from "../communication/Communication";
 import DebugBarContainer from "../containers/DebugBarContainer";
+import Settings from "../modals/Settings";
 
 const DefaultLayout = ({component: Component, ...rest}) => {
   return (
@@ -16,6 +17,7 @@ const DefaultLayout = ({component: Component, ...rest}) => {
             <div className="container">
               <Component {...matchProps} />
             </div>
+            <Settings />
           </main>
       )} />
   )

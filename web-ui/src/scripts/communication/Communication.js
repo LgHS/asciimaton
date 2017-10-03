@@ -5,11 +5,52 @@ import {connect} from "react-redux";
 import {changeState, setSocketConnected} from "../actions/actions";
 import {COLORS, STATE_MACHINE, STATES} from "../reducers/state-machine";
 
-const socket = io('http://localhost:54321');
+let socket = null;
 
 class Communication extends React.Component {
   componentDidMount() {
+    this._initSocket(this.props.ui.socketServer);
+  }
+
+  componentWillReceiveProps(nextProps) {
     const self = this;
+
+    // check that wanted state is different than current
+    if(this.props.stateMachine.name !== nextProps.stateMachine.name) {
+
+      this._updateLeds(nextProps.stateMachine.leds);
+
+      // update callback when button is pressed based on new state
+      socket.removeAllListeners("button.isPressed");
+      socket.on('button.isPressed', (data) => {
+        if (COLORS.includes(data.color)) {
+          const nextState = nextProps.stateMachine.buttons[data.color];
+          if (nextState) {
+            self._changeState(nextProps.stateMachine.buttons[data.color]);
+          }
+        }
+      });
+    }
+
+    // check that socket server config has changed
+    if(this.props.ui.socketServer.url !== nextProps.ui.socketServer.url
+        || this.props.ui.socketServer.port !== nextProps.ui.socketServer.port) {
+      this._initSocket(nextProps.ui.socketServer);
+    }
+  }
+
+  _initSocket(socketServer) {
+    const self = this;
+
+    if(socket) {
+      self._changeState(STATES.NOT_CONNECTED);
+      self.props.setSocketConnected(false);
+      socket.disconnect();
+      socket.removeAllListeners('connect');
+      socket.removeAllListeners('connect_error');
+    }
+
+    socket = io.connect(`http://${socketServer.url}:${socketServer.port}`);
 
     socket.on('connect', () => {
       self._changeState(STATES.LOGO);
@@ -18,30 +59,8 @@ class Communication extends React.Component {
 
     socket.on('connect_error', function() {
       self._changeState(STATES.NOT_CONNECTED);
-      // socket.disconnect();
       self.props.setSocketConnected(false);
-    });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const self = this;
-
-    // check that wanted state is different than current
-    if(this.props.stateMachine.name === nextProps.stateMachine.name) {
-      return;
-    }
-
-    this._updateLeds(nextProps.stateMachine.leds);
-
-    // update callback when button is pressed based on new state
-    socket.removeAllListeners("button.isPressed");
-    socket.on('button.isPressed', (data) => {
-      if(COLORS.includes(data.color)) {
-        const nextState = nextProps.stateMachine.buttons[data.color];
-        if(nextState) {
-          self._changeState(nextProps.stateMachine.buttons[data.color]);
-        }
-      }
+      socket.disconnect();
     });
   }
 
@@ -73,7 +92,8 @@ class Communication extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    stateMachine: state.stateMachine
+    stateMachine: state.stateMachine,
+    ui: state.ui
   };
 };
 
