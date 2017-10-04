@@ -15,6 +15,9 @@ except ImportError as e:
 
 try:
     import RPi.GPIO as GPIO
+except ImportError:
+	print('No GPIO')
+	GPIO = None
 except RuntimeError:
     print('-- Not on a Raspberry Pi! Emulating env... (WIP)')
     print()
@@ -46,9 +49,9 @@ LEDS = PI_OUT
 
 # (Presumably) current state of LEDS
 _LEDS = {
-	'L_RED': GPIO.LOW,
-	'L_BLUE': GPIO.LOW,
-	'L_GREEN': GPIO.LOW
+	'L_RED': 0,
+	'L_BLUE': 0,
+	'L_GREEN': 0
 }
 
 
@@ -132,13 +135,13 @@ def on_webcam_processing(json):
 
 	print('webcam.output')
 
-	txt = asciimaton.img2txt(pgm)
+	txt = asciimaton.img2txt(pgm, WATERMARK)
 	print('img2txt done!')
 	new_pgm = asciimaton.txt2img(txt)
 	print('txt2img done!')
 
 	with open('current.txt', 'w', encoding='utf-8') as f:
-		f.write(txt.decode('utf-8'))
+		f.write(txt)
 
 
 	# with open('static/current.pgm', 'wb') as f:
@@ -158,18 +161,26 @@ def on_webcam_processing(json):
 def on_led_state_change(json):
 	# ({'led': 'RED', 'state': 'HIGH'})
 
-	states = {'HIGH': GPIO.HIGH, 'LOW': GPIO.LOW}
 	states_name = {'HIGH': 'on', 'LOW': 'off'}
 
 	led = 'L_{}'.format(json['led'])
-	state = states[json['state']]
 
 	print('Turning {} {}'.format(states_name[json['state']], led))
 
-	GPIO.output(LEDS[led].value, state)
-	_LEDS[led] = state
+	states = {'HIGH': 1, 'LOW': 0}
+	state = states[json['state']]
 
+	_LEDS[led] = state
 	print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
+
+	if not GPIO:
+		print('Error! No GPIO!')
+		emit('error', {'msg': 'No GPIO to turn on leds'})
+		return
+
+
+	GPIO.output(LEDS[led].value, state)
+
 
 # TODO: Listen to GPIO
 # button.isPressed({'color': 'RED'})
@@ -206,11 +217,14 @@ def on_printer_print(json):
 
 
 if __name__ == '__main__':
+    ADDR = ('192.168.12.182', 54321) 
+
+    WATERMARK = 'lghs.be'
+
     try:
         GPIOHandler.init(GPIO)
 
         print("Starting websocket server")
-        socketio.run(app, host='192.168.12.182', port='54321')
-        # socketio.run(app, host='192.168.12.182', port='54321', debug=True)
+        socketio.run(app, host=ADDR[0], port=ADDR[1])
     finally:
-        GPIO.cleanup()
+        GPIOHandler.cleanup(GPIO)
