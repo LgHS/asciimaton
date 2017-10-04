@@ -34,11 +34,6 @@ class PI_IN(Enum):
 	B_BLUE = 25
 	B_GREEN = 23
 
-	B_UP = 5
-	B_DOWN = 13
-	B_RIGHT = 6
-	B_LEFT = 19
-
 #######
 
 app = Flask(__name__)
@@ -46,6 +41,15 @@ socketio = SocketIO(app)
 
 # We'll assume we didn't crash
 is_rdy = True
+
+LEDS = PI_OUT
+
+# (Presumably) current state of LEDS
+_LEDS = {
+	'L_RED': GPIO.LOW,
+	'L_BLUE': GPIO.LOW,
+	'L_GREEN': GPIO.LOW
+}
 
 
 class GPIOHandler:
@@ -153,11 +157,29 @@ def on_webcam_processing(json):
 @socketio.on('led.changeState')
 def on_led_state_change(json):
 	# ({'led': 'RED', 'state': 'HIGH'})
+
 	states = {'HIGH': GPIO.HIGH, 'LOW': GPIO.LOW}
-	GPIO.output(PI_OUT['L_{}'.format(json['led'])], states[json['state']])
+	states_name = {'HIGH': 'on', 'LOW': 'off'}
+
+	led = 'L_{}'.format(json['led'])
+	state = states[json['state']]
+
+	print('Turning {} {}'.format(states_name[json['state']], led))
+
+	GPIO.output(LEDS[led].value, state)
+	_LEDS[led] = state
+
+	print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
 # TODO: Listen to GPIO
 # button.isPressed({'color': 'RED'})
+
+# Emulating buttons press
+@socketio.on('button.emulatePress')
+def on_button_emulate_press(json):
+	emit('button.isPressed', json)
+	print('button.emulatePress', json)
+
 
 @socketio.on('printer.print')
 def on_printer_print(json):
