@@ -108,34 +108,46 @@ def on_webcam_processing(json):
 	#	foo = f.read()
 	# print(pgm == foo)
 
-	# TODO: Doesn't work yet
-	CONVERT = False
+	CONVERT = True
 
-	if CONVERT:
-		with io.BytesIO() as output:
-			img = Image.open(io.BytesIO(img))
-			# img.convert('RGB')
-			img.save(output, 'PPM')  # Format for .pgm
-
-			pgm = output.getvalue()
-	else:
+	if not CONVERT:
 		pgm = img
+	else:
+		data = io.BytesIO(img)
+		with Image.open(data) as img:
+			out_pgm = io.BytesIO()
+
+			# Format for .pgm
+			img.convert('L').save(out_pgm, 'PPM')
+
+			out_pgm.seek(0)
+			pgm = out_pgm.read()
+
+			# with open('static/test-pgn2pgm.pgm', 'wb') as f:
+			#	f.write(pgm)
 
 	print('webcam.output')
 
 	txt = asciimaton.img2txt(pgm)
-	# print('img2txt done!')
+	print('img2txt done!')
 	new_pgm = asciimaton.txt2img(txt)
-	# print('txt2img done!')
+	print('txt2img done!')
 
 	with open('current.txt', 'w', encoding='utf-8') as f:
 		f.write(txt.decode('utf-8'))
 
-	# Test
-	with open('static/current.pgm', 'wb') as f:
-		f.write(new_pgm)
 
-	emit('asciimaton.output', {'picture': base64.b64encode(new_pgm).decode('utf-8')})
+	# with open('static/current.pgm', 'wb') as f:
+	#	f.write(new_pgm)
+
+	data = io.BytesIO(new_pgm)
+	with Image.open(data) as img:
+		out_png = io.BytesIO()
+		img.convert('RGB').save(out_png, 'PNG')
+		out_png.seek(0)
+		out_png = out_png.read()
+
+	emit('asciimaton.output', {'picture': base64.b64encode(out_png).decode('utf-8')})
 
 
 @socketio.on('led.changeState')
@@ -156,13 +168,18 @@ def on_printer_print(json):
 
 	# TODO: Use copy instead? :)
 	with open('current.txt', 'r', encoding='utf-8') as txt_file:
-		with open('/dev/usb/lp0', "wb") as printer:
-			txt = txt_file.read()
-			printer.write(txt)
+		txt = txt_file.read()
+
+		try:
+			with open('/dev/usb/lp0', "wb+") as printer:
+				printer.write(txt)
+		except FileNotFoundError as e:
+			print('ERROR!\nCan\'t seem to contact printer')
+			emit('error', {'msg': 'Can\'t contact printer!'})
 
 		if save:
-			filename = '/upload/{:%Y-%m-%d %H:%M:%S}.txt'.format(datetime.datetime.now())
-			with open(filename, 'w', encoding='utf-8') as f:
+			filename = 'upload/{:%Y-%m-%d %H:%M:%S}.txt'.format(datetime.datetime.now())
+			with open(filename, 'w+', encoding='utf-8') as f:
 				f.write(txt)
 
 
