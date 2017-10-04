@@ -13,11 +13,11 @@ let middlewares = [];
 // middlewares.push(routerMiddleware(browserHistory));
 
 // add the saga middleware
-const sagaMiddleware = createSagaMiddleware();
-middlewares.push(sagaMiddleware);
+// const sagaMiddleware = createSagaMiddleware();
+// middlewares.push(sagaMiddleware);
 
 // add the freeze dev middleware
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'dev') {
   middlewares.push(freeze);
 }
 
@@ -25,14 +25,14 @@ if (process.env.NODE_ENV !== 'production') {
 let middleware = applyMiddleware(...middlewares);
 
 // add the redux dev tools
-if (process.env.NODE_ENV !== 'production' && window.devToolsExtension) {
+if (process.env.NODE_ENV === 'dev' && window.devToolsExtension) {
   middleware = compose(middleware, window.devToolsExtension());
 }
 
 // create the store
 const store = createStore(reducers, middleware);
 // const history = syncHistoryWithStore(browserHistory, store);
-sagaMiddleware.run(sagas);
+// sagaMiddleware.run(sagas);
 
 // export
 export { store, history };

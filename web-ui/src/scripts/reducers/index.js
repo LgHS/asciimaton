@@ -1,12 +1,12 @@
 import { combineReducers } from "redux";
-import { reducer as formReducer } from "redux-form";
 
 import ui from './ui';
 import stateMachine from "./state-machine";
+import asciimaton from "./asciimaton";
 
 // main reducers
 export const reducers = combineReducers({
-  form: formReducer,
+  asciimaton: asciimaton,
+  stateMachine,
   ui,
-  stateMachine
 });

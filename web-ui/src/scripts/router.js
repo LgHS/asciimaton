@@ -4,8 +4,8 @@ import App from "./components/App";
 import Home from "./pages/Home";
 import Live from "./pages/Live";
 import Still from "./pages/Still";
-import Printing from "./pages/Printing";
-import Facebook from "./pages/Facebook";
+import Print from "./pages/Print";
+import Share from "./pages/Share";
 import DefaultLayout from "./pages/Layout";
 
 // build the router
@@ -15,8 +15,8 @@ const router = (
         <DefaultLayout exact path="/" component={Home}/>
         <DefaultLayout path="/live" component={Live}/>
         <DefaultLayout path="/still" component={Still}/>
-        <DefaultLayout path="/print" component={Printing}/>
-        <DefaultLayout path="/share" component={Facebook}/>
+        <DefaultLayout path="/print" component={Print}/>
+        <DefaultLayout path="/share" component={Share}/>
       </Switch>
     </HashRouter>
 );

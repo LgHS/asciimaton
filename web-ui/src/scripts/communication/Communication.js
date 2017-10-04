@@ -2,7 +2,7 @@ import React from 'react';
 import io from 'socket.io-client';
 import {withRouter} from 'react-router-dom';
 import {connect} from "react-redux";
-import {changeState, setSocketConnected} from "../actions/actions";
+import {changeState, removeWebcamOutput, setAsciimatonOutput, setSocketConnected} from "../actions/actions";
 import {COLORS, STATE_MACHINE, STATES} from "../reducers/state-machine";
 
 let socket = null;
@@ -15,18 +15,19 @@ class Communication extends React.Component {
   componentWillReceiveProps(nextProps) {
     const self = this;
 
-    // check that wanted state is different than current
+    // Update buttons and leds on state change
+    // (check that wanted state is different than current)
     if(this.props.stateMachine.name !== nextProps.stateMachine.name) {
-
       this._updateLeds(nextProps.stateMachine.leds);
 
       // update callback when button is pressed based on new state
       socket.removeAllListeners("button.isPressed");
       socket.on('button.isPressed', (data) => {
         if (COLORS.includes(data.color)) {
-          const nextState = nextProps.stateMachine.buttons[data.color];
+          const nextState = nextProps.stateMachine.buttons[data.color].next;
+          const payload = nextProps.stateMachine.buttons[data.color].payload;
           if (nextState) {
-            self._changeState(nextProps.stateMachine.buttons[data.color]);
+            self._changeState(nextState, payload);
           }
         }
       });
@@ -36,6 +37,27 @@ class Communication extends React.Component {
     if(this.props.ui.socketServer.url !== nextProps.ui.socketServer.url
         || this.props.ui.socketServer.port !== nextProps.ui.socketServer.port) {
       this._initSocket(nextProps.ui.socketServer);
+    }
+
+    // check that we have a output to send to server
+    if(!this.props.asciimaton.webcamOutput && nextProps.asciimaton.webcamOutput) {
+      socket.emit('webcam.output', {
+        picture: nextProps.asciimaton.webcamOutput
+      });
+      // remove asciimaton data from state
+      this.props.removeWebcamOutput();
+    }
+
+    // send print signal to server
+    if(this.props.stateMachine.name === STATES.STILL && nextProps.stateMachine.name === STATES.SHARE) {
+      socket.emit('printer.print');
+    }
+
+    // send share action to server
+    if(this.props.stateMachine.name === STATES.SHARE && nextProps.stateMachine.name === STATES.PRINT) {
+      if(nextProps.stateMachine.payload.share) {
+        socket.emit('asciimaton.save');
+      }
     }
   }
 
@@ -62,11 +84,24 @@ class Communication extends React.Component {
       self.props.setSocketConnected(false);
       socket.disconnect();
     });
+
+    socket.on('asciimaton.output', (data) => {
+      self.props.setAsciimatonOutput(data.picture);
+      self._changeState(STATES.STILL);
+    });
+
+    socket.on('printer.isReady', () => {
+      self.props.removeWebcamOutput();
+      self.props.setAsciimatonOutput(null);
+      self._changeState(STATES.LOGO);
+    });
   }
 
-  _changeState(nextState) {
-    this.props.history.push(STATE_MACHINE[nextState].url);
-    this.props.changeState(nextState);
+  _changeState(nextState, payload) {
+    if(STATE_MACHINE[nextState].url) {
+      this.props.history.push(STATE_MACHINE[nextState].url);
+    }
+    this.props.changeState(nextState, payload);
   }
 
   _updateLeds(leds) {
@@ -93,7 +128,8 @@ class Communication extends React.Component {
 const mapStateToProps = state => {
   return {
     stateMachine: state.stateMachine,
-    ui: state.ui
+    ui: state.ui,
+    asciimaton: state.asciimaton
   };
 };
 
@@ -102,8 +138,14 @@ const mapDispatchToProps = dispatch => {
     setSocketConnected: (isSocketConnected) => {
       dispatch(setSocketConnected(isSocketConnected));
     },
-    changeState: (state) => {
-      dispatch(changeState(state));
+    changeState: (state, payload) => {
+      dispatch(changeState(state, payload));
+    },
+    removeWebcamOutput: () => {
+      dispatch(removeWebcamOutput());
+    },
+    setAsciimatonOutput: (picture) => {
+      dispatch(setAsciimatonOutput(picture));
     }
   }
 };

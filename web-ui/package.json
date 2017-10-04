@@ -7,9 +7,7 @@
   "author": "Jonathan Berger <john@lghs.be>",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress --colors --hot --inline",
-    "start:dev": "webpack-dev-server --config ./webpack.dev.config.js  --progress --colors",
-    "build:dev": "webpack --config ./webpack.dev.config.js --progress --colors",
+    "start": "NODE_ENV=dev webpack-dev-server --progress --colors --hot --inline",
     "build": "webpack -p --config ./webpack.prod.config.js --progress --colors"
   },
   "devDependencies": {
@@ -26,6 +24,7 @@
     "express": "^4.15.4",
     "extract-text-webpack-plugin": "2.1.0",
     "file-loader": "0.11.2",
+    "glfx": "^0.0.4",
     "image-webpack-loader": "^3.4.2",
     "node-sass": "4.5.3",
     "react": "15.5.4",

@@ -3,13 +3,14 @@ import {CHANGE_STATE} from "../actions/actions";
 export const COLORS = ['green', 'red', 'blue'];
 
 export const STATES = {
-  NOT_CONNECTED: "notConnected",
-  LOGO: "logo",
-  LIVE: "live",
   COUNTDOWN: "countdown",
-  STILL: "still",
+  LIVE: "live",
+  LOGO: "logo",
+  NOT_CONNECTED: "notConnected",
+  PRINT: "print",
   SHARE: "share",
-  PRINT: "print"
+  STILL: "still",
+  WAITING: "waiting",
 };
 
 export const STATE_MACHINE = {
@@ -22,9 +23,24 @@ export const STATE_MACHINE = {
       blue: 0
     },
     buttons: {
-      green: null,
-      red: null,
-      blue: null
+      green: {next: null},
+      red: {next: null},
+      blue: {next: null}
+    }
+  },
+
+  [STATES.WAITING]: {
+    name: STATES.WAITING,
+    url: null,
+    leds: {
+      green: 0,
+      red: 0,
+      blue: 0
+    },
+    buttons: {
+      green: {next: null},
+      red: {next: null},
+      blue: {next: null}
     }
   },
 
@@ -38,9 +54,9 @@ export const STATE_MACHINE = {
       blinking: true
     },
     buttons: {
-      green: STATES.LIVE,
-      red: STATES.LIVE,
-      blue: STATES.LIVE
+      green: {next: STATES.LIVE},
+      red: {next: STATES.LIVE},
+      blue: {next: STATES.LIVE}
     }
   },
 
@@ -53,9 +69,24 @@ export const STATE_MACHINE = {
       blue: 0
     },
     buttons: {
-      green: STATES.STILL,
-      red: STATES.LOGO,
-      blue: null
+      green: {next: STATES.COUNTDOWN},
+      red: {next: STATES.LOGO},
+      blue: {next: null}
+    }
+  },
+
+  [STATES.COUNTDOWN]: {
+    name: STATES.COUNTDOWN,
+    url: null,
+    leds: {
+      green: 0,
+      red: 0,
+      blue: 0
+    },
+    buttons: {
+      green: {next: null},
+      red: {next: STATES.LIVE},
+      blue: {next: null}
     }
   },
 
@@ -68,9 +99,9 @@ export const STATE_MACHINE = {
       blue: 1
     },
     buttons: {
-      green: null,
-      red: STATES.LIVE,
-      blue: STATES.SHARE
+      green: {next: null},
+      red: {next: STATES.LIVE},
+      blue: {next: STATES.SHARE}
     }
   },
 
@@ -83,9 +114,9 @@ export const STATE_MACHINE = {
       blue: 0
     },
     buttons: {
-      green: STATES.PRINT,
-      red: STATES.PRINT,
-      blue: null
+      green: {next: STATES.PRINT, payload: {share: true}},
+      red: {next: STATES.PRINT, payload: {share: false}},
+      blue: {next: null}
     }
   },
   [STATES.PRINT]: {
@@ -97,22 +128,24 @@ export const STATE_MACHINE = {
       blue: 0
     },
     buttons: {
-      green: null,
-      red: null,
-      blue: null
+      green: {next: null},
+      red: {next: null},
+      blue: {next: null}
     }
   }
 };
 
 const initialState = {
-  ...STATE_MACHINE[STATES.NOT_CONNECTED]
+  ...STATE_MACHINE[STATES.NOT_CONNECTED],
+  payload: {}
 };
 
 const stateMachine = (state = initialState, action) => {
   switch (action.type) {
     case CHANGE_STATE:
       return {
-        ...STATE_MACHINE[action.state]
+        ...STATE_MACHINE[action.state],
+        payload: action.payload
       }
   }
   return state;

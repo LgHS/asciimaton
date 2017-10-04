@@ -1,6 +1,11 @@
 @import 'tools/reset';
-
 @import 'components/modal';
+@import 'pages/home';
+@import 'pages/live';
+@import 'pages/print';
+@import 'pages/share';
+@import 'pages/still';
+@import 'pages/webcam';
 
 body {
   background-color: black;
@@ -12,7 +17,7 @@ body {
   background-color: rgb(0, 255, 0);
   bottom: 0;
   color: black;
-  position: absolute;
+  position: fixed;
   right: 0;
 
   &__nav {
@@ -28,15 +33,10 @@ main {
   width: 100vw;
 }
 
-.page__home {
+.page {
   align-items: center;
   display: flex;
   height: 100vh;
   justify-content: center;
   width: 100vw;
-
-  .logo {
-    width: 423px;
-    height: 226px;
-  }
 }

@@ -6,7 +6,7 @@ import {connect} from "react-redux";
 const Home = ({isSocketConnected}) => {
   if (isSocketConnected) {
     return (
-        <div className="page__home">
+        <div className="page page__home">
           <h1 className='logo'>
             <img src={Logo}/>
           </h1>

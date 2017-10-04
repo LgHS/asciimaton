@@ -5,15 +5,15 @@
 import {Route} from "react-router-dom";
 import React from "react";
 import Communication from "../communication/Communication";
-import DebugBarContainer from "../containers/DebugBarContainer";
 import Settings from "../modals/Settings";
+import DebugBar from "../components/DebugBar";
 
 const DefaultLayout = ({component: Component, ...rest}) => {
   return (
       <Route {...rest} render={matchProps => (
           <main className="container">
             <Communication/>
-            <DebugBarContainer />
+            <DebugBar />
             <div className="container">
               <Component {...matchProps} />
             </div>

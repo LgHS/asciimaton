@@ -23,11 +23,11 @@ app.use(express.static(__dirname + '/node_modules'));
 /**
  *   - printer.isReady
  - button.isPressed({color: "RED"|"GREEN"|"BLUE"})
- - asciimaton.output({picture: base64buffer})
+ - asciimaton.output({asciimaton: base64buffer})
 
  ### From client
  - led.changeState({color: "RED"|"GREEN"|"BLUE", state: "HIGH|LOW"})
- - webcam.output({picture: base64buffer})
+ - webcam.output({asciimaton: base64buffer})
  - printer.print
  - asciimaton.save
  */
@@ -50,11 +50,34 @@ io.on('connection', function(client) {
     }
   });
 
+  replServer.defineCommand('printerIsReady', {
+    help: 'Use this to reset UI',
+    action() {
+      this.bufferedCommand = '';
+      client.emit('printer.isReady');
+      this.displayPrompt();
+    }
+  });
+
   client.on('led.changeState', (data) => {
     if(COLORS.includes(data.color) && data.state) {
       leds[data.color] = data.state;
       displayButtons(leds);
     }
+  });
+
+  client.on('webcam.output', (data) => {
+    client.emit('asciimaton.output', data);
+  });
+
+  client.on('printer.print', () => {
+    console.log('Print...');
+    replServer.displayPrompt();
+  });
+
+  client.on('asciimaton.save', () => {
+    console.log('Save picture on hard drive');
+    replServer.displayPrompt();
   });
 });
 
