@@ -72,7 +72,8 @@ char *img2txt(
 	out_buf[out_size] = '\0';
 
 	// write footer
-	write_footer(out_buf, *txt_w, *txt_h, footer);
+	if ( footer != NULL )
+		write_footer(out_buf, *txt_w, *txt_h, footer);
 
 	return out_buf;
 }
