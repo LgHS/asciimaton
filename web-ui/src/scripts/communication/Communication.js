@@ -4,6 +4,7 @@ import {withRouter} from 'react-router-dom';
 import {connect} from "react-redux";
 import {changeState, removeWebcamOutput, setAsciimatonOutput, setSocketConnected} from "../actions/actions";
 import {COLORS, STATE_MACHINE, STATES} from "../reducers/state-machine";
+import {decreaseBrightness, decreaseContrast, increaseBrightness, increaseContrast} from "../actions/webcamActions";
 
 let socket = null;
 
@@ -88,7 +89,6 @@ class Communication extends React.Component {
     socket.on('connect_error', function() {
       self._changeState(STATES.NOT_CONNECTED);
       self.props.setSocketConnected(false);
-      socket.disconnect();
     });
 
     socket.on('asciimaton.output', (data) => {
@@ -101,6 +101,12 @@ class Communication extends React.Component {
       self.props.setAsciimatonOutput(null);
       self._changeState(STATES.LOGO);
     });
+
+    socket.on('control.increaseBrightness', () => { self.props.increaseBrightness(); });
+    socket.on('control.decreaseBrightness', () => { self.props.decreaseBrightness(); });
+    socket.on('control.increaseContrast', () => { self.props.increaseContrast(); });
+    socket.on('control.decreaseContrast', () => { self.props.decreaseContrast(); });
+    socket.on('control.reload', () => { window.location.reload(); });
   }
 
   _changeState(nextState, payload) {
@@ -152,7 +158,19 @@ const mapDispatchToProps = dispatch => {
     },
     setAsciimatonOutput: (picture) => {
       dispatch(setAsciimatonOutput(picture));
-    }
+    },
+    increaseBrightness: () => {
+      dispatch(increaseBrightness());
+    },
+    decreaseBrightness: () => {
+      dispatch(decreaseBrightness());
+    },
+    increaseContrast: () => {
+      dispatch(increaseContrast());
+    },
+    decreaseContrast: () => {
+      dispatch(decreaseContrast());
+    },
   }
 };
 

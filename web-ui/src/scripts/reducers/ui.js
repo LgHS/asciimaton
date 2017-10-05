@@ -8,12 +8,6 @@ const initialState = {
     url: 'localhost',
     port: '54321'
   },
-  webcam: {
-    width: 768,
-    height: 1024,
-    horizontal_crop: 30,
-    vertical_crop: 30,
-  },
 };
 
 const ui = (state = initialState, action) => {
@@ -52,12 +46,6 @@ const ui = (state = initialState, action) => {
       return {
         ...state,
         socketServer: action.serverData
-      };
-      break;
-    case actions.UPDATE_WEBCAM_SETTINGS:
-      return {
-        ...state,
-        webcam: action.webcamData
       };
       break;
   }

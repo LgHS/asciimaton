@@ -40,21 +40,21 @@ class Settings extends React.Component {
               <h3>Webcam</h3>
               <p>
                 <label htmlFor='webcam_width'>Webcam width</label>
-                <input type='number' ref='webcam_width' id='webcam_width' defaultValue={this.props.ui.webcam.width}/>
+                <input type='number' ref='webcam_width' id='webcam_width' defaultValue={this.props.webcam.width}/>
               </p>
               <p>
                 <label htmlFor='webcam_height'>Webcam height</label>
-                <input type='number' ref='webcam_height' id='webcam_height' defaultValue={this.props.ui.webcam.height}/>
+                <input type='number' ref='webcam_height' id='webcam_height' defaultValue={this.props.webcam.height}/>
               </p>
               {/*<p>*/}
                 {/*<label htmlFor='webcam_horizontal_crop'>Horizontal crop</label>*/}
                 {/*<input type='number' ref='webcam_horizontal_crop' id='webcam_horizontal_crop'*/}
-                       {/*defaultValue={this.props.ui.webcam.horizontal_crop}/>*/}
+                       {/*defaultValue={this.props.webcam.horizontal_crop}/>*/}
               {/*</p>*/}
               {/*<p>*/}
                 {/*<label htmlFor='webcam_vertical_crop'>Vertical crop</label>*/}
                 {/*<input type='number' ref='webcam_vertical_crop' id='webcam_vertical_crop'*/}
-                       {/*defaultValue={this.props.ui.webcam.vertical_crop}/>*/}
+                       {/*defaultValue={this.props.webcam.vertical_crop}/>*/}
               {/*</p>*/}
 
               <p>
@@ -72,7 +72,8 @@ class Settings extends React.Component {
 export default connect(
     (state) => {
       return {
-        ui: state.ui
+        ui: state.ui,
+        webcam: state.webcam,
       };
     },
     (dispatch) => {

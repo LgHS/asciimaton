@@ -30,17 +30,24 @@ index.html // dev html entry point (for npm start command)
 ```
 
 ## Communication
-### From server
+### From Server
+- printer.isReady
+- button.isPressed({color: "red"|"green"|"blue"})
+- asciimaton.output({asciimaton: base64buffer})
+- webcam.updateFilter({filter: "contrast"|"brightness", modifier: "increase"|"decrease"})
+- ui.reload
 
-  - printer.isReady
-  - button.isPressed({color: "RED"|"GREEN"|"BLUE"})
-  - asciimaton.output({picture: base64buffer})
-  
 ### From client
-  - led.changeState({color: "RED"|"GREEN"|"BLUE", state: "HIGH|LOW"})
-  - webcam.output({picture: base64buffer})
-  - printer.print
-  - asciimaton.save
+- led.changeState({color: "red"|"green"|"blue", state: "high"|"low"})
+- webcam.output({asciimaton: base64buffer})
+- printer.print
+- asciimaton.save
+
+### Remote control
+Namespace: /control
+- webcam.updateFilter({filter: "contrast"|"brightness", modifier: "increase"|"decrease"})
+- button.isPressed({color: "red"|"green"|"blue"})
+- ui.reload
   
 ## States
 ### NOT CONNECTED

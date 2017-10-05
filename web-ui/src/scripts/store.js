@@ -17,7 +17,7 @@ let middlewares = [];
 // middlewares.push(sagaMiddleware);
 
 // add the freeze dev middleware
-if (process.env.NODE_ENV === 'dev') {
+if (process.env.NODE_ENV !== 'production') {
   middlewares.push(freeze);
 }
 
@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === 'dev') {
 let middleware = applyMiddleware(...middlewares);
 
 // add the redux dev tools
-if (process.env.NODE_ENV === 'dev' && window.devToolsExtension) {
+if (process.env.NODE_ENV !== 'production' && window.devToolsExtension) {
   middleware = compose(middleware, window.devToolsExtension());
 }
 

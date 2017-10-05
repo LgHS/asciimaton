@@ -85,7 +85,7 @@ export const STATE_MACHINE = {
     },
     buttons: {
       green: {next: null},
-      red: {next: STATES.LIVE},
+      red: {next: null},
       blue: {next: null}
     }
   },

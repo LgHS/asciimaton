@@ -60,6 +60,8 @@ class Capture extends React.Component {
           <div className="page page__live">
             <Webcam ref={(webcam) => this.webcam = webcam} width={this.props.webcam.width}
                     height={this.props.webcam.height}
+                    brightnessModifier={this.props.webcam.brightnessModifier}
+                    contrastModifier={this.props.webcam.contrastModifier}
                     horizontal_crop={this.props.webcam.horizontal_crop}
                     vertical_crop={this.props.webcam.vertical_crop}/>
             {countDown}
@@ -74,7 +76,7 @@ class Capture extends React.Component {
 export default connect(
     (state) => {
       return {
-        webcam: state.ui.webcam,
+        webcam: state.webcam,
         stateMachine: state.stateMachine
       }
     },

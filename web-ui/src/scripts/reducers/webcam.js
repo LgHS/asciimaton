@@ -1,0 +1,50 @@
+import * as actions from "../actions/actions";
+import * as webcamActions from "../actions/webcamActions";
+import {INCREASE_BRIGHTNESS} from "../actions/webcamActions";
+
+const initialState = {
+  width: 768,
+  height: 1024,
+  horizontal_crop: 30,
+  vertical_crop: 30,
+  brightnessModifier: 0,
+  contrastModifier: 0,
+};
+
+const webcam = (state = initialState, action) => {
+  switch(action.type) {
+    case actions.UPDATE_WEBCAM_SETTINGS:
+      return {
+        ...state,
+        ...action.webcamData
+      };
+      break;
+    case webcamActions.INCREASE_BRIGHTNESS:
+      return {
+        ...state,
+        brightnessModifier: state.brightnessModifier + 1
+      };
+      break;
+    case webcamActions.DECREASE_BRIGHTNESS:
+      return {
+        ...state,
+        brightnessModifier: state.brightnessModifier - 1
+      };
+      break;
+    case webcamActions.INCREASE_CONTRAST:
+      return {
+        ...state,
+        contrastModifier: state.contrastModifier + 1
+      };
+      break;
+    case webcamActions.DECREASE_CONTRAST:
+      return {
+        ...state,
+        contrastModifier: state.contrastModifier - 1
+      };
+      break;
+  }
+  return state;
+};
+
+export default webcam;

@@ -4,8 +4,7 @@ class Webcam extends React.Component {
   componentDidMount() {
     const self = this;
     this.canvas = this.refs['webcamCanvas'];
-    const context = this.canvas.getContext("2d");
-    const video = document.createElement("video");
+    this.video = document.createElement("video");
     this.animationFrame = null;
     const videoObject = {
       video: true,
@@ -18,44 +17,35 @@ class Webcam extends React.Component {
 
     if (navigator.getUserMedia) {
       navigator.getUserMedia(videoObject, (stream) => {
-        video.src = window.URL.createObjectURL(stream);
-        video.onplaying = () => {
-          this.animationFrame = requestAnimationFrame(loop);
-        };
-        video.onpause = () => {
-          cancelAnimationFrame(this.animationFrame);
-        };
-        video.play();
+        self.video.src = window.URL.createObjectURL(stream);
+        self.video.play();
+        self._initAnimationLoop({
+          brightnessModifier: self.props.brightnessModifier,
+          canvas: self.canvas,
+          contrastModifier: self.props.contrastModifier,
+          video: self.video,
+        });
       }, errBack);
     }
-
-    const loop = () => {
-      // context.scale(1, -1);
-      context.rotate(-90 * Math.PI / 180);
-      // context.drawImage(video, self.props.vertical_crop, self.props.horizontal_crop,
-      //     self.canvas.height - (self.props.vertical_crop * 2), self.canvas.width - (self.props.horizontal_crop * 2));
-      context.drawImage(video, 0, 0, self.canvas.height, self.canvas.width);
-      context.setTransform(1, 0, 0, 1, 0, self.canvas.height);
-      // context.translate(0, canvas.width);
-      self._convertToGreyscale(context, this.canvas);
-      this.animationFrame = requestAnimationFrame(loop);
-    };
   }
 
-  _convertToGreyscale(context, canvas) {
-    let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    let data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      let bright = 0.34 * data[i] + 0.5 * data[i + 1] + 0.16 * data[i + 2];
-      data[i] = bright;
-      data[i + 1] = bright;
-      data[i + 2] = bright;
-    }
-    context.putImageData(imageData, 0, 0);
+  _initAnimationLoop({canvas, contrastModifier, brightnessModifier, video}) {
+    cancelAnimationFrame(this.animationFrame);
+    const loop = () => {
+      if (canvas) {
+        const context = canvas.getContext("2d");
+        context.rotate(-90 * Math.PI / 180);
+        context.drawImage(video, 0, 0, canvas.height, canvas.width);
+        context.setTransform(1, 0, 0, 1, 0, canvas.height);
+        context.filter = `contrast(${100 + (contrastModifier * 10)}%) grayscale(100%) brightness(${100 + (brightnessModifier * 10)}%)`;
+      }
+      this.animationFrame = requestAnimationFrame(loop);
+    };
+    this.animationFrame = requestAnimationFrame(loop);
   }
 
   getResizedSnapshot() {
-    if(!this.canvas || !this.context) {
+    if (!this.canvas || !this.context) {
       console.warn('No canvas or context found for snapshot, aborting');
       return;
     }
@@ -71,11 +61,20 @@ class Webcam extends React.Component {
   }
 
   getSnapshot() {
-    if(!this.canvas || !this.context) {
+    if (!this.canvas || !this.context) {
       console.warn('No canvas or context found for snapshot, aborting');
       return;
     }
     return this.canvas.toDataURL();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this._initAnimationLoop({
+      canvas: this.canvas,
+      contrastModifier: nextProps.contrastModifier,
+      brightnessModifier: nextProps.brightnessModifier,
+      video: this.video,
+    });
   }
 
   componentWillUnmount() {

@@ -21,20 +21,66 @@ let leds = {
 app.use(express.static(__dirname + '/node_modules'));
 
 /**
- *   - printer.isReady
+ ### From Server
+ - printer.isReady
  - button.isPressed({color: "RED"|"GREEN"|"BLUE"})
  - asciimaton.output({asciimaton: base64buffer})
+ - webcam.updateFilter({type: "contrast"|"brightness", modifier: "increase"|"decrease"})
+ - ui.reload
 
  ### From client
  - led.changeState({color: "RED"|"GREEN"|"BLUE", state: "HIGH|LOW"})
  - webcam.output({asciimaton: base64buffer})
  - printer.print
  - asciimaton.save
+
+ ### Remote control
+ Namespace: /control
+ - webcam.updateFilter({type: "contrast"|"brightness", modifier: "increase"|"decrease"})
+ - ui.reload
+ - pressButton({color: "red"|"green"|"blue"})
  */
 io.on('connection', function(client) {
   console.log('Client connected...');
+  defineCommands(client);
   displayButtons({});
 
+  client.on('led.changeState', (data) => {
+    if(COLORS.includes(data.color) && data.state) {
+      leds[data.color] = data.state;
+      displayButtons(leds);
+    }
+  });
+
+  client.on('webcam.output', (data) => {
+    client.emit('asciimaton.output', data);
+  });
+
+  client.on('printer.print', () => {
+    console.log('Print...');
+    replServer.displayPrompt();
+  });
+
+  client.on('asciimaton.save', () => {
+    console.log('Save picture on hard drive');
+    replServer.displayPrompt();
+  });
+
+  client.on('control.pressButton', (data) => {
+    io.sockets.emit('button.isPressed', data.color);
+  });
+});
+
+const displayButtons = (colors) => {
+  const green = colors.green === 'high' ? 'x' : ' ';
+  const red = colors.red === 'high' ? 'x' : ' ';
+  const blue = colors.blue === 'high' ? 'x' : ' ';
+
+  console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
+  replServer.displayPrompt();
+};
+
+const defineCommands = (client) => {
   replServer.defineCommand('press', {
     help: 'Use this to simulate button press',
     action(rawColor) {
@@ -59,35 +105,51 @@ io.on('connection', function(client) {
     }
   });
 
-  client.on('led.changeState', (data) => {
-    if(COLORS.includes(data.color) && data.state) {
-      leds[data.color] = data.state;
-      displayButtons(leds);
+  replServer.defineCommand('increaseBrightness', {
+    help: "Increase webcam brightness",
+    action() {
+      this.bufferedCommand = '';
+      client.emit('control.increaseBrightness');
+      this.displayPrompt();
     }
   });
 
-  client.on('webcam.output', (data) => {
-    client.emit('asciimaton.output', data);
+  replServer.defineCommand('decreaseBrightness', {
+    help: "Decrease webcam brightness",
+    action() {
+      this.bufferedCommand = '';
+      client.emit('control.decreaseBrightness');
+      this.displayPrompt();
+    }
   });
 
-  client.on('printer.print', () => {
-    console.log('Print...');
-    replServer.displayPrompt();
+  replServer.defineCommand('increaseContrast', {
+    help: "Increase webcam contrast",
+    action() {
+      this.bufferedCommand = '';
+      client.emit('control.increaseContrast');
+      this.displayPrompt();
+    }
   });
 
-  client.on('asciimaton.save', () => {
-    console.log('Save picture on hard drive');
-    replServer.displayPrompt();
+  replServer.defineCommand('decreaseContrast', {
+    help: "Decrease webcam contrast",
+    action() {
+      this.bufferedCommand = '';
+      client.emit('control.decreaseContrast');
+      this.displayPrompt();
+    }
   });
-});
 
-const displayButtons = (colors) => {
-  const green = colors.green === 'HIGH' ? 'x' : ' ';
-  const red = colors.red === 'HIGH' ? 'x' : ' ';
-  const blue = colors.blue === 'HIGH' ? 'x' : ' ';
+  replServer.defineCommand('reload', {
+    help: "Reload UI",
+    action() {
+      this.bufferedCommand = '';
+      client.emit('control.reload');
+      this.displayPrompt();
+    }
+  });
 
-  console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
-  replServer.displayPrompt();
 };
 
 server.listen(54321);
