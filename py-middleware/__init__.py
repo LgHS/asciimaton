@@ -9,15 +9,15 @@ from flask_socketio import SocketIO, send, emit
 from PIL import Image
 
 try:
-	import asciimaton
+    import asciimaton
 except ImportError as e:
-	print('Failed to load asciimaton')
+    print('Failed to load asciimaton')
 
 try:
     import RPi.GPIO as GPIO
 except ImportError:
-	print('No GPIO')
-	GPIO = None
+    print('No GPIO')
+    GPIO = None
 except RuntimeError:
     print('-- Not on a Raspberry Pi! Emulating env... (WIP)')
     print()
@@ -26,16 +26,16 @@ except RuntimeError:
 
 # LEDS
 class PI_OUT(Enum):
-	L_RED = 27
-	L_BLUE = 17
-	L_GREEN = 22
+    L_RED = 27
+    L_BLUE = 17
+    L_GREEN = 22
 
 
 # Buttons
 class PI_IN(Enum):
-	B_RED = 24
-	B_BLUE = 25
-	B_GREEN = 23
+    B_RED = 24
+    B_BLUE = 25
+    B_GREEN = 23
 
 #######
 
@@ -49,9 +49,9 @@ LEDS = PI_OUT
 
 # (Presumably) current state of LEDS
 _LEDS = {
-	'L_RED': 0,
-	'L_BLUE': 0,
-	'L_GREEN': 0
+    'L_RED': 0,
+    'L_BLUE': 0,
+    'L_GREEN': 0
 }
 
 
@@ -83,121 +83,152 @@ class GPIOHandler:
 
 @app.route('/test/')
 def test():
-	pgm = open("static/lena420.pgm", "rb").read()
-	txt = asciimaton.img2txt(pgm)
-	new_pgm = asciimaton.txt2img(txt)
-	with open('static/test.pgm', 'wb') as f:
-		f.write(new_pgm)
+    """For all your testing desires..."""
 
-	# with open('/dev/usb/lp0', "wb") as f:
-	#	f.write(txt)
+    pgm = open("static/lena420.pgm", "rb").read()
+    txt = asciimaton.img2txt(pgm)
+    new_pgm = asciimaton.txt2img(txt)
+    with open('static/test.pgm', 'wb') as f:
+        f.write(new_pgm)
 
-	return 'henlo!'
+    # with open('/dev/usb/lp0', "wb") as f:
+    #    f.write(txt)
+
+    return 'henlo!'
 
 
 @app.route('/')
 def main():
-	return render_template('index.html')
+    return render_template('index.html')
 
 
-@socketio.on('connect')
+@app.route('/controller/')
+def controller():
+    return render_template('controller.html')
+
+
+@socketio.on('connect', namespace="/ui")
 def on_connect():
-	emit('printer.isReady', is_rdy)
+    emit('printer.isReady', is_rdy, namespace="/ui")
 
 
-@socketio.on('webcam.output')
+@socketio.on('webcam.output', namespace='/ui')
 def on_webcam_processing(json):
-	print('webcam.output')
-	json = json['picture'][len('data:image/png;base64,'):]
+    print('webcam.output')
 
-	print(json[:128])
+    json = json['picture'][len('data:image/png;base64,'):]
 
-	img = base64.b64decode(
-		json
-	)
+    print(json[:128])
 
-	# with open('static/lena420.pgm', 'rb') as f:
-	#	foo = f.read()
-	# print(pgm == foo)
+    img = base64.b64decode(
+        json
+    )
 
-	CONVERT = True
+    # with open('static/lena420.pgm', 'rb') as f:
+    #    foo = f.read()
+    # print(pgm == foo)
 
-	if not CONVERT:
-		pgm = img
-	else:
-		data = io.BytesIO(img)
-		with Image.open(data) as img:
-			out_pgm = io.BytesIO()
+    CONVERT = True
 
-			# Format for .pgm
-			img.convert('L').save(out_pgm, 'PPM')
+    if not CONVERT:
+        pgm = img
+    else:
+        data = io.BytesIO(img)
+        with Image.open(data) as img:
+            out_pgm = io.BytesIO()
 
-			out_pgm.seek(0)
-			pgm = out_pgm.read()
+            # Format for .pgm
+            img.convert('L').save(out_pgm, 'PPM')
 
-			# with open('static/test-pgn2pgm.pgm', 'wb') as f:
-			#	f.write(pgm)
+            out_pgm.seek(0)
+            pgm = out_pgm.read()
 
-	txt = asciimaton.img2txt(pgm, WATERMARK)
-	print('img2txt done!')
-	new_pgm = asciimaton.txt2img(txt)
-	print('txt2img done!')
+            # with open('static/test-pgn2pgm.pgm', 'wb') as f:
+            #    f.write(pgm)
 
-	with open('current.txt', 'w', encoding='utf-8') as f:
-		f.write(txt)
+    txt = asciimaton.img2txt(pgm, WATERMARK)
+    print('img2txt done!')
+    new_pgm = asciimaton.txt2img(txt)
+    print('txt2img done!')
+
+    with open('current.txt', 'w', encoding='utf-8') as f:
+        f.write(txt)
+
+    # with open('static/current.pgm', 'wb') as f:
+    #    f.write(new_pgm)
+
+    data = io.BytesIO(new_pgm)
+    with Image.open(data) as img:
+        out_png = io.BytesIO()
+        img.convert('RGB').save(out_png, 'PNG')
+        out_png.seek(0)
+        out_png = out_png.read()
+
+    emit(
+        'asciimaton.output',
+        {'picture': 'data:image/png;base64,'+base64.b64encode(out_png).decode('utf-8')},
+        namespace='/ui'
+    )
 
 
-	# with open('static/current.pgm', 'wb') as f:
-	#	f.write(new_pgm)
-
-	data = io.BytesIO(new_pgm)
-	with Image.open(data) as img:
-		out_png = io.BytesIO()
-		img.convert('RGB').save(out_png, 'PNG')
-		out_png.seek(0)
-		out_png = out_png.read()
-
-	emit('asciimaton.output', {'picture': 'data:image/png;base64,'+base64.b64encode(out_png).decode('utf-8')})
-
-
-@socketio.on('led.changeState')
+@socketio.on('led.changeState', namespace='/ui')
 def on_led_state_change(json):
-	# ({'color': 'RED', 'state': 'high'})
+    # ({'color': 'RED', 'state': 'high'})
 
-	states_name = {'high': 'on', 'low': 'off'}
+    states_name = {'high': 'on', 'low': 'off'}
 
-	led = 'L_{}'.format(json['color'])
+    led = 'L_{}'.format(json['color'])
 
-	print('Turning {} {}'.format(states_name[json['state']], led))
+    print('Turning {} {}'.format(states_name[json['state']], led))
 
-	states = {'high': 1, 'low': 0}
-	state = states[json['state']]
+    states = {'high': 1, 'low': 0}
+    state = states[json['state']]
 
-	_LEDS[led] = state
-	print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
+    _LEDS[led] = state
+    print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
-	if not GPIO:
-		print('Error! No GPIO!')
-		emit('error', {'msg': 'No GPIO to turn on leds'})
-		return
+    if not GPIO:
+        print('Error! No GPIO!')
+        # emit('error', {'msg': 'No GPIO to turn on leds'})
+        return
 
-
-	GPIO.output(LEDS[led].value, state)
-
-
-# TODO: Listen to GPIO
-# button.isPressed({'color': 'RED'})
-
-# Emulating buttons press
-@socketio.on('button.emulatePress')
-def on_button_emulate_press(json):
-	emit('button.isPressed', json)
-	print('button.emulatePress', json)
+    GPIO.output(LEDS[led].value, state)
 
 
-@socketio.on('asciimaton.save')
+@socketio.on('button.isPressed', namespace="/control")
+def on_button_press(json):
+    emit('button.isPressed', json, namespace='/ui', broadcast=True)
+    print('button.isPressed', json)
+
+
+@socketio.on('webcam.updateFilter', namespace="/control")
+def on_webcam_update_filter(json):
+    print('webcam.updateFilter')
+    emit('webcam.updateFilter', json, namespace="/ui", broadcast=True)
+
+
+@socketio.on('ui.reload', namespace="/control")
+def on_ui_reload():
+    print('ui.reload')
+    emit('ui.reload', namespace="/ui", broadcast=True)
+
+
+@socketio.on('printer.setLineThickness', namespace="/control")
+def on_printer_set_line_thickness(json):
+    # {'thickness': 0...4}
+    global THICKNESS
+    
+    print('printer.setLineThickness', json)
+    
+    n = int(json['thickness'])
+    
+    THICKNESS = min(3, max(0, n))
+    
+
+@socketio.on('asciimaton.save', namespace='/ui')
 def on_asciimaton_save():
     print('asciimaton.save')
+    
     with open('current.txt', 'r', encoding='utf-8') as txt_file:
         txt = txt_file.read()
 
@@ -207,10 +238,7 @@ def on_asciimaton_save():
             f.write(txt)
 
 
-
-
-
-@socketio.on('printer.print')
+@socketio.on('printer.print', namespace="/ui")
 def on_printer_print():
     print('printer.print')
 
@@ -218,26 +246,31 @@ def on_printer_print():
         txt = txt_file.read()
         txt_split = txt.split('\n')
         
-        txt = '\n'.join('\r'.join(el) for el in zip(*([txt_split]*THICKNESS)))+'\n' if THICKNESS > 1 else txt
+        if THICKNESS > 1:
+            txt = '\n'.join(
+                '\r'.join(el) for el in zip(*([txt_split]*THICKNESS))
+            ) + '\n'
         
         try:
             with open('/dev/usb/lp0', "w") as printer:
                 printer.write('\x1B0\x1BM'+txt)
         except FileNotFoundError as e:
             print('ERROR!\nCan\'t seem to contact printer')
-            emit('error', {'msg': 'Can\'t contact printer!'})
+            emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
             
 
 if __name__ == '__main__':
-    ADDR = ('127.0.0.1', 54321) 
+    # ADDR = ('127.0.0.1', 54321) 
+    ADDR = ('0.0.0.0', 54321) 
 
     WATERMARK = 'lghs.be'
-    THICKNESS = 2
+    THICKNESS = 1
 
     try:
         GPIOHandler.init(GPIO)
 
         print("Starting websocket server")
-        socketio.run(app, host=ADDR[0], port=ADDR[1])
+        # socketio.run(app, host=ADDR[0], port=ADDR[1])
+        socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
     finally:
         GPIOHandler.cleanup(GPIO)
