@@ -78,7 +78,7 @@ class Communication extends React.Component {
       socket.removeAllListeners('connect_error');
     }
 
-    socket = io.connect(`http://${socketServer.url}:${socketServer.port}`);
+    socket = io.connect(`http://${socketServer.url}:${socketServer.port}/ui`);
     window.socket = socket;
 
     socket.on('connect', () => {
@@ -102,11 +102,32 @@ class Communication extends React.Component {
       self._changeState(STATES.LOGO);
     });
 
-    socket.on('control.increaseBrightness', () => { self.props.increaseBrightness(); });
-    socket.on('control.decreaseBrightness', () => { self.props.decreaseBrightness(); });
-    socket.on('control.increaseContrast', () => { self.props.increaseContrast(); });
-    socket.on('control.decreaseContrast', () => { self.props.decreaseContrast(); });
-    socket.on('control.reload', () => { window.location.reload(); });
+    socket.on('webcam.updateFilter', (payload) => {
+      if(!payload.action || !payload.action) {
+        console.error('No action or filter found for webcam.updateFilter message');
+        return;
+      }
+
+      if(payload.filter === 'brightness') {
+        if(payload.action === 'increase') {
+          self.props.increaseBrightness();
+        } else if(payload.action === 'decrease') {
+          self.props.decreaseBrightness();
+        }
+      }
+
+      if(payload.filter === 'contrast') {
+        if(payload.action === 'increase') {
+          self.props.increaseContrast();
+        } else if(payload.action === 'decrease') {
+          self.props.decreaseContrast();
+        }
+      }
+    });
+
+    socket.on('ui.reload', () => {
+      window.location.reload();
+    });
   }
 
   _changeState(nextState, payload) {

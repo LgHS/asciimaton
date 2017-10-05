@@ -14,6 +14,8 @@ Made with Reactjs.
 - `yarn` or `npm install`
 - `npm run build`
 
+Build files are in `static/` and html in `templates/`
+
 ### Test
 
 Test middleware with `node ./test/fake-middleware.js`.
@@ -34,7 +36,7 @@ index.html // dev html entry point (for npm start command)
 - printer.isReady
 - button.isPressed({color: "red"|"green"|"blue"})
 - asciimaton.output({asciimaton: base64buffer})
-- webcam.updateFilter({filter: "contrast"|"brightness", modifier: "increase"|"decrease"})
+- webcam.updateFilter({filter: "contrast"|"brightness", action: "increase"|"decrease"})
 - ui.reload
 
 ### From client
@@ -45,9 +47,10 @@ index.html // dev html entry point (for npm start command)
 
 ### Remote control
 Namespace: /control
-- webcam.updateFilter({filter: "contrast"|"brightness", modifier: "increase"|"decrease"})
+- webcam.updateFilter({filter: "contrast"|"brightness", action: "increase"|"decrease"})
 - button.isPressed({color: "red"|"green"|"blue"})
 - ui.reload
+- printer.setLineOverwrite({number: 0...4})
   
 ## States
 ### NOT CONNECTED

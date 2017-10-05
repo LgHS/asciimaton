@@ -20,74 +20,73 @@ let leds = {
 
 app.use(express.static(__dirname + '/node_modules'));
 
+const uiNamespace = io.of('/ui');
+const controlNamespace = io.of('/control');
+
+
 /**
- ### From Server
- - printer.isReady
- - button.isPressed({color: "RED"|"GREEN"|"BLUE"})
- - asciimaton.output({asciimaton: base64buffer})
- - webcam.updateFilter({type: "contrast"|"brightness", modifier: "increase"|"decrease"})
- - ui.reload
-
- ### From client
- - led.changeState({color: "RED"|"GREEN"|"BLUE", state: "HIGH|LOW"})
- - webcam.output({asciimaton: base64buffer})
- - printer.print
- - asciimaton.save
-
- ### Remote control
- Namespace: /control
- - webcam.updateFilter({type: "contrast"|"brightness", modifier: "increase"|"decrease"})
- - ui.reload
- - pressButton({color: "red"|"green"|"blue"})
+ * Handle UI messages
  */
-io.on('connection', function(client) {
-  console.log('Client connected...');
-  defineCommands(client);
-  displayButtons({});
+uiNamespace.on('connection', function(uiClient) {
+  console.log('UI client connected');
+  _displayButtons({});
 
-  client.on('led.changeState', (data) => {
+  uiClient.on('led.changeState', (data) => {
     if(COLORS.includes(data.color) && data.state) {
       leds[data.color] = data.state;
-      displayButtons(leds);
+      _displayButtons(leds);
     }
   });
 
-  client.on('webcam.output', (data) => {
-    client.emit('asciimaton.output', data);
+  uiClient.on('webcam.output', (data) => {
+    uiNamespace.emit('asciimaton.output', data);
   });
 
-  client.on('printer.print', () => {
+  uiClient.on('printer.print', () => {
     console.log('Print...');
     replServer.displayPrompt();
   });
 
-  client.on('asciimaton.save', () => {
+  uiClient.on('asciimaton.save', () => {
     console.log('Save picture on hard drive');
     replServer.displayPrompt();
   });
+});
 
-  client.on('control.pressButton', (data) => {
-    io.sockets.emit('button.isPressed', data.color);
+/**
+ * Handle Control messages
+ */
+controlNamespace.on('connection', (controlClient) => {
+  console.log('Controller client connected');
+
+  controlClient.on('webcam.updateFilter', (payload) => {
+    uiNamespace.emit('webcam.updateFilter', payload);
+    console.log('Control: forwarding webcam.updateFilter to UI');
+  });
+  controlClient.on('button.isPressed', (payload) => {
+    uiNamespace.emit('button.isPressed', payload);
+    console.log('Control: forwarding button.isPressed to UI');
+  });
+  controlClient.on('ui.reload', () => {
+    uiNamespace.emit('ui.reload');
+    console.log('Control: forwarding ui.reload to UI');
+  });
+  controlClient.on('printer.setLineOverwrite', (payload) => {
+    console.log('Setting line overwrite: ', payload.number);
   });
 });
 
-const displayButtons = (colors) => {
-  const green = colors.green === 'high' ? 'x' : ' ';
-  const red = colors.red === 'high' ? 'x' : ' ';
-  const blue = colors.blue === 'high' ? 'x' : ' ';
-
-  console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
-  replServer.displayPrompt();
-};
-
-const defineCommands = (client) => {
+/**
+ * Handle REPL Commands
+ */
+const defineReplCommands = () => {
   replServer.defineCommand('press', {
     help: 'Use this to simulate button press',
     action(rawColor) {
       this.bufferedCommand = '';
       let color = rawColor.toLowerCase();
       if(COLORS.includes(color)) {
-        client.emit('button.isPressed', {color});
+        uiNamespace.emit('button.isPressed', {color});
         console.log(`Button ${color} pressed`);
       } else {
         console.error(`Color ${color} not valid`);
@@ -100,56 +99,100 @@ const defineCommands = (client) => {
     help: 'Use this to reset UI',
     action() {
       this.bufferedCommand = '';
-      client.emit('printer.isReady');
+      uiNamespace.emit('printer.isReady');
       this.displayPrompt();
     }
   });
 
-  replServer.defineCommand('increaseBrightness', {
-    help: "Increase webcam brightness",
-    action() {
+  replServer.defineCommand('webcam', {
+    help: "Update webcam filters",
+    action(command) {
+      command = command.split(" ");
+      let filter = command[0];
+      let action = command[1];
+
       this.bufferedCommand = '';
-      client.emit('control.increaseBrightness');
+      if(filter === 'b') { filter = 'brightness'; }
+      if(filter === 'c') { filter = 'contrast'; }
+      if(filter !== 'brightness' && filter !== 'contrast') {
+        console.error(`filter ${filter} not valid`);
+        this.displayPrompt();
+        return;
+      }
+
+      if(action === 'i') { action = 'increase'; }
+      if(action === 'd') { action = 'decrease'; }
+      if(action !== 'increase' && action !== 'decrease') {
+        console.error(`action ${action} not valid`);
+        this.displayPrompt();
+        return;
+      }
+
+      uiNamespace.emit('webcam.updateFilter', {
+        action,
+        filter
+      });
       this.displayPrompt();
     }
   });
 
-  replServer.defineCommand('decreaseBrightness', {
-    help: "Decrease webcam brightness",
-    action() {
-      this.bufferedCommand = '';
-      client.emit('control.decreaseBrightness');
-      this.displayPrompt();
-    }
-  });
-
-  replServer.defineCommand('increaseContrast', {
-    help: "Increase webcam contrast",
-    action() {
-      this.bufferedCommand = '';
-      client.emit('control.increaseContrast');
-      this.displayPrompt();
-    }
-  });
-
-  replServer.defineCommand('decreaseContrast', {
-    help: "Decrease webcam contrast",
-    action() {
-      this.bufferedCommand = '';
-      client.emit('control.decreaseContrast');
-      this.displayPrompt();
-    }
-  });
+  // replServer.defineCommand('increaseBrightness', {
+  //   help: "Increase webcam brightness",
+  //   action() {
+  //     this.bufferedCommand = '';
+  //     client.emit('control.increaseBrightness');
+  //     this.displayPrompt();
+  //   }
+  // });
+  //
+  // replServer.defineCommand('decreaseBrightness', {
+  //   help: "Decrease webcam brightness",
+  //   action() {
+  //     this.bufferedCommand = '';
+  //     client.emit('control.decreaseBrightness');
+  //     this.displayPrompt();
+  //   }
+  // });
+  //
+  // replServer.defineCommand('increaseContrast', {
+  //   help: "Increase webcam contrast",
+  //   action() {
+  //     this.bufferedCommand = '';
+  //     client.emit('control.increaseContrast');
+  //     this.displayPrompt();
+  //   }
+  // });
+  //
+  // replServer.defineCommand('decreaseContrast', {
+  //   help: "Decrease webcam contrast",
+  //   action() {
+  //     this.bufferedCommand = '';
+  //     client.emit('control.decreaseContrast');
+  //     this.displayPrompt();
+  //   }
+  // });
 
   replServer.defineCommand('reload', {
     help: "Reload UI",
     action() {
       this.bufferedCommand = '';
-      client.emit('control.reload');
+      uiNamespace.emit('control.reload');
       this.displayPrompt();
     }
   });
-
 };
 
+
+const _displayButtons = (colors) => {
+  const green = colors.green === 'high' ? 'x' : ' ';
+  const red = colors.red === 'high' ? 'x' : ' ';
+  const blue = colors.blue === 'high' ? 'x' : ' ';
+
+  console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
+  replServer.displayPrompt();
+};
+
+// init REPL comands
+defineReplCommands();
+// init server
 server.listen(54321);
