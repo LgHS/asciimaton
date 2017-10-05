@@ -2,21 +2,32 @@
 
 Made with Reactjs.
 
-## Dev :
+## How to run
+### Dev :
 
 - `yarn` or `npm install`
 - `npm start` 
 - serves on `localhost:8080` with hot reloading
 
-## Build :
+### Build :
 
 - `yarn` or `npm install`
 - `npm run build`
 
-## Test
+### Test
 
 Test middleware with `node ./test/fake-middleware.js`.
 It will instanciate a socket on `localhost:54321`.
+
+
+## Structure
+
+```
+./src // JS, CSS and images
+./static // assets generated with webpack (npm run build)
+./templates // prod html files
+index.html // dev html entry point (for npm start command)
+```
 
 ## Communication
 ### From server

@@ -33,6 +33,11 @@ class Communication extends React.Component {
       });
     }
 
+    // Add socket to window in god mode
+    if(this.props.ui.godMode !== nextProps.ui.godMode) {
+      window.socket = nextProps.ui.godMode ? socket : null;
+    }
+
     // check that socket server config has changed
     if(this.props.ui.socketServer.url !== nextProps.ui.socketServer.url
         || this.props.ui.socketServer.port !== nextProps.ui.socketServer.port) {
@@ -73,6 +78,7 @@ class Communication extends React.Component {
     }
 
     socket = io.connect(`http://${socketServer.url}:${socketServer.port}`);
+    window.socket = socket;
 
     socket.on('connect', () => {
       self._changeState(STATES.LOGO);
@@ -108,17 +114,17 @@ class Communication extends React.Component {
     // green
     socket.emit('led.changeState', {
       color: 'green',
-      state: leds['green'] ? 'HIGH' : 'LOW'
+      state: leds['green'] ? 'high' : 'low'
     });
     // red
     socket.emit('led.changeState', {
       color: 'red',
-      state: leds['red'] ? 'HIGH' : 'LOW'
+      state: leds['red'] ? 'high' : 'low'
     });
     // blue
     socket.emit('led.changeState', {
       color: 'blue',
-      state: leds['blue'] ? 'HIGH' : 'LOW'
+      state: leds['blue'] ? 'high' : 'low'
     });
   }
 
