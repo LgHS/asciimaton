@@ -107,8 +107,13 @@ def on_connect():
 
 @socketio.on('webcam.output')
 def on_webcam_processing(json):
+	print('webcam.output')
+	json = json['picture'][len('data:image/png;base64,'):]
+
+	print(json[:128])
+
 	img = base64.b64decode(
-		json['picture']
+		json
 	)
 
 	# with open('static/lena420.pgm', 'rb') as f:
@@ -133,8 +138,6 @@ def on_webcam_processing(json):
 			# with open('static/test-pgn2pgm.pgm', 'wb') as f:
 			#	f.write(pgm)
 
-	print('webcam.output')
-
 	txt = asciimaton.img2txt(pgm, WATERMARK)
 	print('img2txt done!')
 	new_pgm = asciimaton.txt2img(txt)
@@ -154,20 +157,20 @@ def on_webcam_processing(json):
 		out_png.seek(0)
 		out_png = out_png.read()
 
-	emit('asciimaton.output', {'picture': base64.b64encode(out_png).decode('utf-8')})
+	emit('asciimaton.output', {'picture': 'data:image/png;base64,'+base64.b64encode(out_png).decode('utf-8')})
 
 
 @socketio.on('led.changeState')
 def on_led_state_change(json):
-	# ({'led': 'RED', 'state': 'HIGH'})
+	# ({'color': 'RED', 'state': 'high'})
 
-	states_name = {'HIGH': 'on', 'LOW': 'off'}
+	states_name = {'high': 'on', 'low': 'off'}
 
-	led = 'L_{}'.format(json['led'])
+	led = 'L_{}'.format(json['color'])
 
 	print('Turning {} {}'.format(states_name[json['state']], led))
 
-	states = {'HIGH': 1, 'LOW': 0}
+	states = {'high': 1, 'low': 0}
 	state = states[json['state']]
 
 	_LEDS[led] = state
@@ -192,34 +195,44 @@ def on_button_emulate_press(json):
 	print('button.emulatePress', json)
 
 
+@socketio.on('asciimaton.save')
+def on_asciimaton_save():
+    print('asciimaton.save')
+    with open('current.txt', 'r', encoding='utf-8') as txt_file:
+        txt = txt_file.read()
+
+        # TODO: Use copy instead? :)
+        filename = 'upload/{:%Y-%m-%d %H:%M:%S}.txt'.format(datetime.datetime.now())
+        with open(filename, 'w+', encoding='utf-8') as f:
+            f.write(txt)
+
+
+
+
+
 @socketio.on('printer.print')
-def on_printer_print(json):
-	# {'save': True|False}
-	print('printer.print', json)
+def on_printer_print():
+    print('printer.print')
 
-	save = json['save']
-
-	# TODO: Use copy instead? :)
-	with open('current.txt', 'r', encoding='utf-8') as txt_file:
-		txt = txt_file.read()
-
-		try:
-			with open('/dev/usb/lp0', "wb+") as printer:
-				printer.write(txt)
-		except FileNotFoundError as e:
-			print('ERROR!\nCan\'t seem to contact printer')
-			emit('error', {'msg': 'Can\'t contact printer!'})
-
-		if save:
-			filename = 'upload/{:%Y-%m-%d %H:%M:%S}.txt'.format(datetime.datetime.now())
-			with open(filename, 'w+', encoding='utf-8') as f:
-				f.write(txt)
-
+    with open('current.txt', 'r', encoding='utf-8') as txt_file:
+        txt = txt_file.read()
+        txt_split = txt.split('\n')
+        
+        txt = '\n'.join('\r'.join(el) for el in zip(*([txt_split]*THICKNESS)))+'\n' if THICKNESS > 1 else txt
+        
+        try:
+            with open('/dev/usb/lp0', "w") as printer:
+                printer.write('\x1B0\x1BM'+txt)
+        except FileNotFoundError as e:
+            print('ERROR!\nCan\'t seem to contact printer')
+            emit('error', {'msg': 'Can\'t contact printer!'})
+            
 
 if __name__ == '__main__':
-    ADDR = ('192.168.12.182', 54321) 
+    ADDR = ('127.0.0.1', 54321) 
 
     WATERMARK = 'lghs.be'
+    THICKNESS = 2
 
     try:
         GPIOHandler.init(GPIO)
