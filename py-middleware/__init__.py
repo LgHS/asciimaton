@@ -1,12 +1,14 @@
 import base64
 import datetime
 import io
+import operator
 from enum import Enum
 from time import sleep
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit
 from PIL import Image
+import serial
 
 try:
     import asciimaton
@@ -41,6 +43,9 @@ class PI_IN(Enum):
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+ser = serial.Serial('/dev/ttyUSB0', 115200)
+# ser = serial.Serial('/dev/ttyUSB1', 115200)
+# ser = serial.Serial('/dev/ttyACM0', 115200)
 
 # We'll assume we didn't crash
 is_rdy = True
@@ -146,7 +151,22 @@ def on_webcam_processing(json):
             # with open('static/test-pgn2pgm.pgm', 'wb') as f:
             #    f.write(pgm)
 
-    txt = asciimaton.img2txt(pgm, WATERMARK)
+    now = datetime.datetime.now()
+    watermark = '\n'.join(WATERMARKS).format(now, DATETIME='{:%Y-%m-%d %H:%M}'.format(now))
+    
+    justifications = {'RIGHT': 'rjust', 'CENTER': 'center'}
+    
+    if JUSTIFICATION in justifications:
+        watermark = watermark.splitlines()
+
+        justifier = operator.methodcaller(
+            justifications[JUSTIFICATION],
+            max(*[len(line) for line in watermark])
+        )
+
+        watermark = '\n'.join(map(justifier, watermark))
+
+    txt = asciimaton.img2txt(pgm, watermark)
     print('img2txt done!')
     new_pgm = asciimaton.txt2img(txt)
     print('txt2img done!')
@@ -187,12 +207,24 @@ def on_led_state_change(json):
     _LEDS[led] = state
     print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
-    if not GPIO:
-        print('Error! No GPIO!')
-        # emit('error', {'msg': 'No GPIO to turn on leds'})
-        return
-
-    GPIO.output(LEDS[led].value, state)
+    if GPIO:
+        GPIO.output(LEDS[led].value, state)
+    else:
+        color = json['color'][0]
+        
+        if state:
+            color = color.upper()
+        else:
+            color = color.lower()
+        
+        print(color.encode('utf-8'), state)
+        
+        ser.write(color.encode('utf-8'))
+        # ser.write(color.encode('utf-8'))
+        # ser.write(color.encode('utf-8'))
+        # ser.write(color.encode('utf-8'))
+        # ser.write(color.encode('utf-8'))
+        # ser.write(color.encode('utf-8'))
 
 
 @socketio.on('button.isPressed', namespace="/control")
@@ -263,7 +295,22 @@ if __name__ == '__main__':
     # ADDR = ('127.0.0.1', 54321) 
     ADDR = ('0.0.0.0', 54321) 
 
-    WATERMARK = 'lghs.be'
+    WATERMARKS = [
+        'ASCIIMATON - lghs.be',
+        
+        # Extra new line
+        '\n',
+        
+        # Syntax: {:<insert your unix date format here>} eg: {:%Y-%m-%d %H:%M}
+        # '{:%Y-%m-%d %H:%M}',
+        
+        # Alternatively just use {DATETIME} to use the default
+        '{DATETIME}',
+    ]
+
+    # CENTER|RIGHT|LEFT
+    JUSTIFICATION = 'CENTER'
+    
     THICKNESS = 1
 
     try:
@@ -274,3 +321,4 @@ if __name__ == '__main__':
         socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
     finally:
         GPIOHandler.cleanup(GPIO)
+        ser.close()

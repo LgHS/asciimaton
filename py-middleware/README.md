@@ -6,7 +6,8 @@ _Requires Python3.5.3+_
 
 ```
 pip install -r requirements.txt
-sudo adduser pi gpio
+sudo adduser $USER gpio
+sudo usermod -a -G dialout $USER
 cd ../src/python
 make
 mv asciimaton.so ../../py-middleware/asciimaton.so
