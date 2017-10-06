@@ -2,6 +2,7 @@ import base64
 import datetime
 import io
 import operator
+import subprocess
 import sys
 from enum import Enum
 from time import sleep
@@ -44,6 +45,8 @@ socketio = SocketIO(app)
 
 try:
     ser = serial.Serial(sys.argv[1], 115200)
+    # subprocess.run(['python', 'buttonListener.py', sys.argv[1]])
+    subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
 except IndexError:
     print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
     sys.exit(1)
@@ -232,6 +235,15 @@ def on_led_state_change(json):
 def on_button_press(json):
     emit('button.isPressed', json, namespace='/ui', broadcast=True)
     print('button.isPressed', json)
+
+
+@app.route('/button.isPressed/<button>')
+def on_button_press2(button):
+    json = {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[button] }
+    socketio.emit('button.isPressed', json, namespace='/ui', broadcast=True)
+    print('button.isPressed', json)
+    
+    return 'Turning on ' + button
 
 
 @socketio.on('webcam.updateFilter', namespace="/control")
