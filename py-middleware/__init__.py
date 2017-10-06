@@ -2,6 +2,7 @@ import base64
 import datetime
 import io
 import operator
+import sys
 from enum import Enum
 from time import sleep
 
@@ -17,11 +18,8 @@ except ImportError as e:
 
 try:
     import RPi.GPIO as GPIO
-except ImportError:
-    print('No GPIO')
-    GPIO = None
-except RuntimeError:
-    print('-- Not on a Raspberry Pi! Emulating env... (WIP)')
+except (RuntimeError, ImportError):
+    print('-- Not on a Raspberry Pi / No GPIO module found')
     print()
 
     GPIO = None
@@ -43,9 +41,12 @@ class PI_IN(Enum):
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-ser = serial.Serial('/dev/ttyUSB0', 115200)
-# ser = serial.Serial('/dev/ttyUSB1', 115200)
-# ser = serial.Serial('/dev/ttyACM0', 115200)
+
+try:
+    ser = serial.Serial(sys.argv[1], 115200)
+except IndexError:
+    print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
+    sys.exit(1)
 
 # We'll assume we didn't crash
 is_rdy = True
