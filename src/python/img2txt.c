@@ -36,7 +36,7 @@ static void write_footer(
 	if ( width != 0 )
 		txt_h++;
 
-	size_t line = in_h - (1 + txt_h + 1) - 1;
+	size_t line = in_h - (1 + txt_h + 1) - 1 - 1;
 	size_t col  = in_w - (1 + txt_w + 1) - 1 - 1;
 
 	memset(out_buf + line * (in_w+1) + col, ' ', txt_w + 2);
