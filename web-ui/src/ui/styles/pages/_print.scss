@@ -1,4 +1,5 @@
 .page__print {
-  align-self: center;
-  justify-self: center;
+  .page__text {
+    font-size: 4rem !important;
+  }
 }

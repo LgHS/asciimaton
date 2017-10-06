@@ -1,17 +1,11 @@
 import React from 'react';
 import {connect} from "react-redux";
+import AsciimatonOutput from "../components/AsciimatonOutput";
 
-const Still = ({asciimatonOutput, webcam}) => (
+const Still = ({asciimatonOutput}) => (
     <div className="page page__still">
-      <img src={asciimatonOutput} width={768} height={1056} />
+      <AsciimatonOutput />
     </div>
 );
 
-export default connect(
-    (state) => {
-      return {
-        webcam: state.webcam,
-        asciimatonOutput: state.asciimaton.asciimatonOutput
-      }
-    }
-)(Still);
+export default Still;

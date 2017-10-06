@@ -49,7 +49,7 @@ class Capture extends React.Component {
 
     if (this.state.countDown) {
       countDown = (
-          <div className='countdown'>
+          <div className='countdown page__text'>
             {this.state.countDown}
           </div>
       )

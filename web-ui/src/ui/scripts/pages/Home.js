@@ -14,7 +14,11 @@ const Home = ({isSocketConnected}) => {
     );
   } else {
     return (
-        <p>Waiting for connection</p>
+        <div className="page page__home">
+          <p className="page__text">
+            Waiting for connection...
+          </p>
+        </div>
     );
   }
 };

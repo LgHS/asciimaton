@@ -1,6 +1,11 @@
 import {CHANGE_STATE} from "../actions/actions";
 
-export const COLORS = ['green', 'red', 'blue'];
+// export const COLORS = ['green', 'red', 'blue'];
+export const COLORS = {
+  green: 'green',
+  red: 'red',
+  blue: 'blue',
+};
 
 export const STATES = {
   COUNTDOWN: "countdown",
@@ -17,11 +22,7 @@ export const STATE_MACHINE = {
   [STATES.NOT_CONNECTED]: {
     name: STATES.NOT_CONNECTED,
     url: "/",
-    leds: {
-      green: 0,
-      red: 0,
-      blue: 0
-    },
+    leds: [],
     buttons: {
       green: {next: null},
       red: {next: null},
@@ -32,11 +33,7 @@ export const STATE_MACHINE = {
   [STATES.WAITING]: {
     name: STATES.WAITING,
     url: null,
-    leds: {
-      green: 0,
-      red: 0,
-      blue: 0
-    },
+    leds: [],
     buttons: {
       green: {next: null},
       red: {next: null},
@@ -47,12 +44,7 @@ export const STATE_MACHINE = {
   [STATES.LOGO]: {
     name: STATES.LOGO,
     url: "/",
-    leds: {
-      green: 1,
-      red: 1,
-      blue: 1,
-      blinking: true
-    },
+    leds: [COLORS.green, COLORS.red, COLORS.blue],
     buttons: {
       green: {next: STATES.LIVE},
       red: {next: STATES.LIVE},
@@ -63,11 +55,7 @@ export const STATE_MACHINE = {
   [STATES.LIVE]: {
     name: STATES.LIVE,
     url: "/live",
-    leds: {
-      green: 1,
-      red: 1,
-      blue: 0
-    },
+    leds: [COLORS.green, COLORS.red],
     buttons: {
       green: {next: STATES.COUNTDOWN},
       red: {next: STATES.LOGO},
@@ -78,11 +66,7 @@ export const STATE_MACHINE = {
   [STATES.COUNTDOWN]: {
     name: STATES.COUNTDOWN,
     url: null,
-    leds: {
-      green: 0,
-      red: 0,
-      blue: 0
-    },
+    leds: [],
     buttons: {
       green: {next: null},
       red: {next: null},
@@ -93,11 +77,7 @@ export const STATE_MACHINE = {
   [STATES.STILL]: {
     name: STATES.STILL,
     url: "/still",
-    leds: {
-      green: 0,
-      red: 1,
-      blue: 1
-    },
+    leds: [COLORS.red, COLORS.blue],
     buttons: {
       green: {next: null},
       red: {next: STATES.LIVE},
@@ -108,11 +88,7 @@ export const STATE_MACHINE = {
   [STATES.SHARE]: {
     name: STATES.SHARE,
     url: "/share",
-    leds: {
-      green: 1,
-      red: 1,
-      blue: 0
-    },
+    leds: [COLORS.green, COLORS.red],
     buttons: {
       green: {next: STATES.PRINT, payload: {share: true}},
       red: {next: STATES.PRINT, payload: {share: false}},
@@ -122,11 +98,7 @@ export const STATE_MACHINE = {
   [STATES.PRINT]: {
     name: STATES.PRINT,
     url: "/print",
-    leds: {
-      green: 0,
-      red: 0,
-      blue: 0
-    },
+    leds: [],
     buttons: {
       green: {next: null},
       red: {next: null},

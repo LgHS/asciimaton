@@ -1,20 +1,22 @@
 @import 'tools/reset';
+@import 'tools/font';
+@import 'components/asciimaton-output';
 @import 'components/modal';
 @import 'pages/home';
 @import 'pages/live';
 @import 'pages/print';
 @import 'pages/share';
 @import 'pages/still';
-@import 'pages/webcam';
 
 html {
   font-size: 14px;
+  letter-spacing: .2em;
 }
 
 body {
   background-color: black;
   color: white;
-  font-family: monospace;
+  font-family: "Karmatic Arcade", monospace;
   overflow: hidden;
 }
 
@@ -44,4 +46,14 @@ main {
   height: 100vh;
   justify-content: center;
   width: 100vw;
+
+  .page__text {
+    font-size: 3rem;
+    padding: 0 2rem;
+    align-self: flex-end;
+    margin-bottom: 200px;
+    position: relative;
+    text-align: center;
+    text-shadow: 0 3px 0 rgba(black, .7);
+  }
 }

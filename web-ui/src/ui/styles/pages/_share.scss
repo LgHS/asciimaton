@@ -1,4 +1,15 @@
 .page__share {
   align-self: center;
   justify-self: center;
+
+  .page__text {
+
+  }
+
+  .link {
+    display: block;
+    font-family: monospace;
+    font-size: 2rem;
+    margin-top: 2rem;
+  }
 }
