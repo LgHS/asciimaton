@@ -5,15 +5,15 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
-  context: resolve(__dirname, 'src'),
+  context: resolve(__dirname, '../src'),
   entry: [
     'babel-polyfill',
-    './scripts/main.js'
+    './controller/scripts/main.js'
     // the entry point of our app
   ],
   output: {
     filename: 'main.js',
-    path: resolve(__dirname, 'static')
+    path: resolve(__dirname, '../build/static/controller')
   },
   devtool: false,
   module: {
@@ -46,7 +46,7 @@ module.exports = {
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
         use: [
-          'file-loader?name=[name].[ext]&outputPath=images/&publicPath=static/',
+          'file-loader?name=[name].[ext]&outputPath=images/&publicPath=static/controller/',
           'image-webpack-loader'
         ]
       }

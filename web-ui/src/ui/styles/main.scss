@@ -7,10 +7,15 @@
 @import 'pages/still';
 @import 'pages/webcam';
 
+html {
+  font-size: 14px;
+}
+
 body {
   background-color: black;
   color: white;
   font-family: monospace;
+  overflow: hidden;
 }
 
 .debugbar {

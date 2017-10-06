@@ -1,0 +1,26 @@
+input,
+select {
+  background-color: #fff;
+  border: none;
+  color: black;
+  font-size: 1rem;
+  padding: 10px 20px;
+}
+
+button[type="button"],
+button[type="submit"] {
+  background-color: #44475a;
+  border: none;
+  //border-bottom: solid 3px darken(#44475a, 5%);
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  text-transform: uppercase;
+
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: lighten(	#44475a, 20%);
+  }
+}

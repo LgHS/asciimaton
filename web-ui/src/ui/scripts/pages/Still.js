@@ -3,7 +3,7 @@ import {connect} from "react-redux";
 
 const Still = ({asciimatonOutput, webcam}) => (
     <div className="page page__still">
-      <img src={asciimatonOutput} width={webcam.width} height={webcam.height} />
+      <img src={asciimatonOutput} width={768} height={1056} />
     </div>
 );
 

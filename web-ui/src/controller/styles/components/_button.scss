@@ -1,0 +1,26 @@
+.btn {
+  border: none;
+  color: rgba(black, .5);
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: bold;
+  min-width: 200px;
+  padding: 10px 20px;
+  text-transform: uppercase;
+
+  &__green {
+    background-color: #50fa7b;
+
+    &:hover, &:active, &:focus { background-color: lighten(#50fa7b, 20%); }
+  }
+  &__red {
+    background-color: 	#ff5555;
+
+    &:hover, &:active, &:focus { background-color: lighten(#ff5555, 20%); }
+  }
+  &__blue {
+    background-color: #8be9fd;
+
+    &:hover, &:active, &:focus { background-color: lighten(#8be9fd, 20%); }
+  }
+}

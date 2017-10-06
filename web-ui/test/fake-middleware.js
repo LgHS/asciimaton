@@ -60,6 +60,7 @@ controlNamespace.on('connection', (controlClient) => {
   console.log('Controller client connected');
 
   controlClient.on('webcam.updateFilter', (payload) => {
+    console.log('updateFilter', payload);
     uiNamespace.emit('webcam.updateFilter', payload);
     console.log('Control: forwarding webcam.updateFilter to UI');
   });
@@ -135,42 +136,6 @@ const defineReplCommands = () => {
       this.displayPrompt();
     }
   });
-
-  // replServer.defineCommand('increaseBrightness', {
-  //   help: "Increase webcam brightness",
-  //   action() {
-  //     this.bufferedCommand = '';
-  //     client.emit('control.increaseBrightness');
-  //     this.displayPrompt();
-  //   }
-  // });
-  //
-  // replServer.defineCommand('decreaseBrightness', {
-  //   help: "Decrease webcam brightness",
-  //   action() {
-  //     this.bufferedCommand = '';
-  //     client.emit('control.decreaseBrightness');
-  //     this.displayPrompt();
-  //   }
-  // });
-  //
-  // replServer.defineCommand('increaseContrast', {
-  //   help: "Increase webcam contrast",
-  //   action() {
-  //     this.bufferedCommand = '';
-  //     client.emit('control.increaseContrast');
-  //     this.displayPrompt();
-  //   }
-  // });
-  //
-  // replServer.defineCommand('decreaseContrast', {
-  //   help: "Decrease webcam contrast",
-  //   action() {
-  //     this.bufferedCommand = '';
-  //     client.emit('control.decreaseContrast');
-  //     this.displayPrompt();
-  //   }
-  // });
 
   replServer.defineCommand('reload', {
     help: "Reload UI",

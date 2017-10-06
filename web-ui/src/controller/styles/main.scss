@@ -1,0 +1,65 @@
+@import "tools/reset";
+@import "components/button";
+@import "components/form";
+@import "components/webcam-filter";
+
+html {
+  font-size: 14px;
+}
+
+body {
+  background-color: #282a36;
+  color: white;
+  font-family: monospace;
+}
+
+p {
+  margin-bottom: .5rem;
+}
+
+.app {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  width: 100vw;
+}
+
+.app-section {
+  border-bottom: solid #555 1px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+  width: 100%;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+.app-section__buttons {
+  text-align: center;
+
+  .btn {
+    display: block;
+    margin: 0 auto 10px;
+  }
+}
+
+.app-section__line-thickness {
+  button[type="submit"] {
+    margin-left: 10px;
+  }
+}
+
+.app-section__reload {
+  text-align: center;
+
+  button[type="button"] {
+    padding: 10px 20px;
+  }
+}

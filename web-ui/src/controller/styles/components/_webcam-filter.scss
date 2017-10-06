@@ -1,0 +1,14 @@
+.webcam-filter {
+  margin-bottom: 10px;
+
+  span {
+    display: inline-block;
+    min-width: 100px;
+  }
+
+  button[type="button"] {
+    font-size: 1.2rem;
+    font-weight: normal;
+    margin-right: 10px;
+  }
+}
