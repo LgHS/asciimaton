@@ -41,15 +41,8 @@ class PI_IN(Enum):
 #######
 
 app = Flask(__name__)
-socketio = SocketIO(app)
-
-try:
-    ser = serial.Serial(sys.argv[1], 115200)
-    # subprocess.run(['python', 'buttonListener.py', sys.argv[1]])
-    subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
-except IndexError:
-    print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
-    sys.exit(1)
+socketio = SocketIO(app, async_mode='threading')
+# socketio = SocketIO(app)
 
 # We'll assume we didn't crash
 is_rdy = True
@@ -201,14 +194,14 @@ def on_led_state_change(json):
 
     states_name = {'high': 'on', 'low': 'off'}
 
-    led = 'L_{}'.format(json['color'])
-
-    print('Turning {} {}'.format(states_name[json['state']], led))
+    led = 'L_{}'.format(json['color'].upper())
 
     states = {'high': 1, 'low': 0}
     state = states[json['state']]
 
     _LEDS[led] = state
+    
+    # print('Turning {} {}'.format(states_name[json['state']], led))
     print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
     if GPIO:
@@ -221,29 +214,14 @@ def on_led_state_change(json):
         else:
             color = color.lower()
         
-        print(color.encode('utf-8'), state)
+        # print(color.encode('utf-8'), state)
         
         ser.write(color.encode('utf-8'))
-        # ser.write(color.encode('utf-8'))
-        # ser.write(color.encode('utf-8'))
-        # ser.write(color.encode('utf-8'))
-        # ser.write(color.encode('utf-8'))
-        # ser.write(color.encode('utf-8'))
-
 
 @socketio.on('button.isPressed', namespace="/control")
 def on_button_press(json):
-    emit('button.isPressed', json, namespace='/ui', broadcast=True)
-    print('button.isPressed', json)
-
-
-@app.route('/button.isPressed/<button>')
-def on_button_press2(button):
-    json = {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[button] }
     socketio.emit('button.isPressed', json, namespace='/ui', broadcast=True)
     print('button.isPressed', json)
-    
-    return 'Turning on ' + button
 
 
 @socketio.on('webcam.updateFilter', namespace="/control")
@@ -286,7 +264,11 @@ def on_asciimaton_save():
 @socketio.on('printer.print', namespace="/ui")
 def on_printer_print():
     print('printer.print')
+    
+    socketio.start_background_task(target=_printer_print)
 
+
+def _printer_print():
     with open('current.txt', 'r', encoding='utf-8') as txt_file:
         txt = txt_file.read()
         txt_split = txt.split('\n')
@@ -302,7 +284,9 @@ def on_printer_print():
         except FileNotFoundError as e:
             print('ERROR!\nCan\'t seem to contact printer')
             emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
-            
+        
+        socketio.emit('printer.isReady', is_rdy, namespace="/ui")
+
 
 if __name__ == '__main__':
     # ADDR = ('127.0.0.1', 54321) 
@@ -328,6 +312,20 @@ if __name__ == '__main__':
 
     try:
         GPIOHandler.init(GPIO)
+        
+        try:
+            ser = serial.Serial(sys.argv[1], 115200)
+            # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
+            def buttonListener():
+                while True:
+                    on_button_press(
+                        {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
+                    )
+            
+            socketio.start_background_task(target=buttonListener)
+        except IndexError:
+            print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
+            sys.exit(1)
 
         print("Starting websocket server")
         # socketio.run(app, host=ADDR[0], port=ADDR[1])
