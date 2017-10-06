@@ -280,7 +280,10 @@ def _printer_print():
         
         try:
             with open('/dev/usb/lp0', "w") as printer:
-                printer.write('\x1B0\x1BM'+txt)
+                try:
+                    printer.write('\x1B0\x1BM'+txt)
+                except OSError as e:
+                    print(e)
         except FileNotFoundError as e:
             print('ERROR!\nCan\'t seem to contact printer')
             emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
@@ -317,7 +320,7 @@ if __name__ == '__main__':
             ser = serial.Serial(sys.argv[1], 115200)
             # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
             def buttonListener():
-                while True:
+                while 42:
                     on_button_press(
                         {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
                     )
