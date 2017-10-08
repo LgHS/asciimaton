@@ -128,7 +128,7 @@ function img2txt(canvas)
 
     var fdata = new Float32Array(data.length / 4);
     for ( var i = 0; i < data.length / 4; i++ )
-        fdata[i] = data[i * 4];
+        fdata[i] = 255 - data[i * 4];
 
     for ( var y = 0; y + IMG2TXT_CHAR_H <= height; y += IMG2TXT_CHAR_H )
     {
