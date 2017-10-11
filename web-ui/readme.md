@@ -3,20 +3,29 @@
 Made with Reactjs.
 
 ## How to run
-### Dev :
+### UI :
 
 - `yarn` or `npm install`
 - `npm start` 
 - serves on `localhost:8080` with hot reloading
 
-### Build :
+### Controller
+
+- `npm run start-controller`
+- serves on `localhost:8081/controller.html`
+
+## How to Build :
 
 - `yarn` or `npm install`
 - `npm run build`
+- `npm run build-controller`
 
 Build files are in `static/` and html in `templates/`
 
 ### Test
+
+**/!\ Currently broken because of led blinking messing with
+the console** 
 
 Test middleware with `node ./test/fake-middleware.js`.
 It will instanciate a socket on `localhost:54321`.

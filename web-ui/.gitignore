@@ -1,3 +1,4 @@
 .idea
 node_modules
 static/
+npm_debug.log
