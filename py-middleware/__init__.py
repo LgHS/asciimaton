@@ -272,12 +272,12 @@ def _printer_print():
     with open('current.txt', 'r', encoding='utf-8') as txt_file:
         txt = txt_file.read()
         txt_split = txt.split('\n')
-        
+
         if THICKNESS > 1:
             txt = '\n'.join(
                 '\r'.join(el) for el in zip(*([txt_split]*THICKNESS))
             ) + '\n'
-        
+
         try:
             with open('/dev/usb/lp0', "w") as printer:
                 try:
@@ -297,25 +297,25 @@ if __name__ == '__main__':
 
     WATERMARKS = [
         'ASCIIMATON - lghs.be',
-        
+
         # Extra new line
-        '\n',
-        
+        '',
+
         # Syntax: {:<insert your unix date format here>} eg: {:%Y-%m-%d %H:%M}
         # '{:%Y-%m-%d %H:%M}',
-        
+
         # Alternatively just use {DATETIME} to use the default
         '{DATETIME}',
     ]
 
     # CENTER|RIGHT|LEFT
     JUSTIFICATION = 'CENTER'
-    
+
     THICKNESS = 1
 
     try:
         GPIOHandler.init(GPIO)
-        
+
         try:
             ser = serial.Serial(sys.argv[1], 115200)
             # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
@@ -324,7 +324,7 @@ if __name__ == '__main__':
                     on_button_press(
                         {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
                     )
-            
+
             socketio.start_background_task(target=buttonListener)
         except IndexError:
             print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
