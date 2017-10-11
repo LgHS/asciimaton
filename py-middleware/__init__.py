@@ -150,9 +150,9 @@ def on_webcam_processing(json):
 
     now = datetime.datetime.now()
     watermark = '\n'.join(WATERMARKS).format(now, DATETIME='{:%Y-%m-%d %H:%M}'.format(now))
-    
+
     justifications = {'RIGHT': 'rjust', 'CENTER': 'center'}
-    
+
     if JUSTIFICATION in justifications:
         watermark = watermark.splitlines()
 
@@ -200,7 +200,7 @@ def on_led_state_change(json):
     state = states[json['state']]
 
     _LEDS[led] = state
-    
+
     # print('Turning {} {}'.format(states_name[json['state']], led))
     print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
@@ -208,14 +208,14 @@ def on_led_state_change(json):
         GPIO.output(LEDS[led].value, state)
     else:
         color = json['color'][0]
-        
+
         if state:
             color = color.upper()
         else:
             color = color.lower()
-        
+
         # print(color.encode('utf-8'), state)
-        
+
         ser.write(color.encode('utf-8'))
 
 @socketio.on('button.isPressed', namespace="/control")
@@ -240,18 +240,18 @@ def on_ui_reload():
 def on_printer_set_line_thickness(json):
     # {'thickness': 0...4}
     global THICKNESS
-    
+
     print('printer.setLineThickness', json)
-    
+
     n = int(json['thickness'])
-    
+
     THICKNESS = min(3, max(0, n))
-    
+
 
 @socketio.on('asciimaton.save', namespace='/ui')
 def on_asciimaton_save():
     print('asciimaton.save')
-    
+
     with open('current.txt', 'r', encoding='utf-8') as txt_file:
         txt = txt_file.read()
 
@@ -264,7 +264,7 @@ def on_asciimaton_save():
 @socketio.on('printer.print', namespace="/ui")
 def on_printer_print():
     print('printer.print')
-    
+
     socketio.start_background_task(target=_printer_print)
 
 
@@ -287,13 +287,13 @@ def _printer_print():
         except FileNotFoundError as e:
             print('ERROR!\nCan\'t seem to contact printer')
             emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
-        
+
         socketio.emit('printer.isReady', is_rdy, namespace="/ui")
 
 
 if __name__ == '__main__':
-    # ADDR = ('127.0.0.1', 54321) 
-    ADDR = ('0.0.0.0', 54321) 
+    # ADDR = ('127.0.0.1', 54321)
+    ADDR = ('0.0.0.0', 54321)
 
     WATERMARKS = [
         'ASCIIMATON - lghs.be',

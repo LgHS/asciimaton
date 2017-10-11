@@ -6,7 +6,7 @@ Made with Reactjs.
 ### UI :
 
 - `yarn` or `npm install`
-- `npm start` 
+- `npm start`
 - serves on `localhost:8080` with hot reloading
 
 ### Controller
@@ -25,7 +25,7 @@ Build files are in `static/` and html in `templates/`
 ### Test
 
 **/!\ Currently broken because of led blinking messing with
-the console** 
+the console**
 
 Test middleware with `node ./test/fake-middleware.js`.
 It will instanciate a socket on `localhost:54321`.
@@ -60,7 +60,7 @@ Namespace: /control
 - button.isPressed({color: "red"|"green"|"blue"})
 - ui.reload
 - printer.setLineOverwrite({number: 0...4})
-  
+
 ## States
 ### NOT CONNECTED
 Waiting for connection to socket server
@@ -74,17 +74,17 @@ Buttons:
 ### LOGO
 Standby screen
 
-LEDs: 
+LEDs:
 - all, blinking
 
-Buttons: 
+Buttons:
 - all => LIVE
 
 ### LIVE
 Webcam up
 
-LEDs: 
-- green 
+LEDs:
+- green
 - red
 
 Buttons:

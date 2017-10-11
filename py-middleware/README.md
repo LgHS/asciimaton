@@ -20,7 +20,7 @@ mv asciimaton.so ../../py-middleware/asciimaton.so
 ## How To
 
 1. `. bin/activate`
-1. `ls /dev/ # Look for ttyUSB0, ttyUSB1 or ttyACM0` 
+1. `ls /dev/ # Look for ttyUSB0, ttyUSB1 or ttyACM0`
 1. `python __init__.py /dev/ttyUSB0`
 
 ## TODO
