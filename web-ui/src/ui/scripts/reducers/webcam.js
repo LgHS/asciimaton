@@ -7,8 +7,8 @@ const initialState = {
   height: 1024,
   horizontal_crop: 30,
   vertical_crop: 30,
-  brightnessModifier: 5,
-  contrastModifier: 2,
+  brightnessModifier: 8,
+  contrastModifier: -2,
 };
 
 const webcam = (state = initialState, action) => {

@@ -5,28 +5,28 @@ Made with Reactjs.
 ## How to run
 ### UI :
 
-- `yarn`
-- `yarn start`
+- `npm install`
+- `npm start`
 - serves on `localhost:8080` with hot reloading
 
 ### Controller
 
-- `yarn run start-controller`
+- `npm run start-controller`
 - serves on `localhost:8081/controller.html`
 
 ## How to Build :
 
-- `yarn`
-- `yarn run build:ui`
-- `yarn run build:controller`
+- `npm install`
+- `npm run build:ui`
+- `npm run build:controller`
 
 Build files are in `static/` and html in `templates/`
 
 ## Build on the ASCIIMATON
 
-- `yarn`
-- `yarn run prod:ui`
-- `yarn run prod:controller`
+- `npm install`
+- `npm run prod:ui`
+- `npm run prod:controller`
 
 ### Test
 
@@ -41,7 +41,7 @@ It will instanciate a socket on `localhost:54321`.
 
 ```
 ./src // JS, CSS and images
-./static // assets generated with webpack (npm run build)
+./static // assets generated with webpack (npm run ui:build)
 ./templates // prod html files
 index.html // dev html entry point (for npm start command)
 ```
