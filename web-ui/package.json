@@ -8,9 +8,11 @@
   "license": "MIT",
   "scripts": {
     "start": "NODE_ENV=dev webpack-dev-server --content-base build/templates --config ./config/ui.config.js --progress --colors --hot --inline",
-    "build": "webpack -p --config ./config/ui.prod.config.js --progress --colors",
-    "start-controller": "NODE_ENV=dev webpack-dev-server --port 8081 --content-base build/templates --config ./config/controller.config.js --progress --colors --hot --inline",
-    "build-controller": "webpack -p --config ./config/controller.prod.config.js --progress --colors"
+    "start:controller": "NODE_ENV=dev webpack-dev-server --port 8081 --content-base build/templates --config ./config/controller.config.js --progress --colors --hot --inline",
+    "ui:build": "webpack -p --config ./config/ui.build.config.js --progress --colors",
+    "controller:build": "webpack -p --config ./config/controller.build.config.js --progress --colors",
+    "ui:prod": "webpack -p --config ./config/ui.prod.config.js --progress --colors",
+    "controller:prod": "webpack -p --config ./config/controller.prod.config.js --progress --colors"
   },
   "devDependencies": {
     "babel-core": "6.24.1",

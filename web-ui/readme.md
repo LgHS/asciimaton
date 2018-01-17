@@ -5,22 +5,28 @@ Made with Reactjs.
 ## How to run
 ### UI :
 
-- `yarn` or `npm install`
-- `npm start`
+- `yarn`
+- `yarn start`
 - serves on `localhost:8080` with hot reloading
 
 ### Controller
 
-- `npm run start-controller`
+- `yarn run start-controller`
 - serves on `localhost:8081/controller.html`
 
 ## How to Build :
 
-- `yarn` or `npm install`
-- `npm run build`
-- `npm run build-controller`
+- `yarn`
+- `yarn run build:ui`
+- `yarn run build:controller`
 
 Build files are in `static/` and html in `templates/`
+
+## Build on the ASCIIMATON
+
+- `yarn`
+- `yarn run prod:ui`
+- `yarn run prod:controller`
 
 ### Test
 
