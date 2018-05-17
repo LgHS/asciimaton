@@ -154,7 +154,7 @@ const _displayButtons = (colors) => {
   const blue = colors.blue === 'high' ? 'x' : ' ';
 
   console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
-  replServer.displayPrompt();
+  replServer.displayPrompt(true);
 };
 
 // init REPL comands
