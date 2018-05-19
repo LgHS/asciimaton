@@ -241,6 +241,9 @@ def _printer_print():
                 '\r'.join(el) for el in zip(*([txt_split]*THICKNESS))
             ) + '\n'
 
+        # print 8 more lines to position paper correctly for next photo
+        txt += "\n\n\n\n\n\n\n\n"
+
         try:
             with open('/dev/usb/lp0', "w") as printer:
                 try:
