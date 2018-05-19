@@ -9,7 +9,6 @@ cd py-middleware
 virtualenv -p python3 .
 . bin/activate
 pip install -r requirements.txt
-sudo adduser $USER gpio  # For GPIO
 sudo usermod -a -G dialout $USER  # For pySerial
 cd ../src/python
 make
