@@ -1,0 +1,11 @@
+algo_img2txt.o
+algo_txt2img.o
+asciimaton.so
+font.c
+fonter
+fonter.o
+img2txt.o
+pgm.o
+txt2img.o
+weighter
+weights.c
