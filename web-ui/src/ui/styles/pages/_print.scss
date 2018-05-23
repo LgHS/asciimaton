@@ -1,5 +1,6 @@
-.page__print {
+.page.page__print {
   .page__text {
-    font-size: 4rem !important;
+    margin-top: 100px;
+    position: absolute;
   }
 }

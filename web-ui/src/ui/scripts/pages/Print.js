@@ -1,5 +1,8 @@
 import React from 'react';
+import Webcam from "../components/Webcam";
 import AsciimatonOutput from "../components/AsciimatonOutput";
+import {changeState, setWebcamOutput} from "../actions/actions";
+import {connect} from "react-redux";
 
 class Print extends React.Component {
   constructor(props) {
@@ -26,7 +29,13 @@ class Print extends React.Component {
 
     return (
         <div className='page page__print'>
-          <AsciimatonOutput transparency />
+          <Webcam ref={(webcam) => this.webcam = webcam} width={this.props.webcam.width}
+                  height={this.props.webcam.height}
+                  brightnessModifier={this.props.webcam.brightnessModifier}
+                  contrastModifier={this.props.webcam.contrastModifier}
+                  horizontal_crop={this.props.webcam.horizontal_crop}
+                  vertical_crop={this.props.webcam.vertical_crop}/>
+
           <div className="page__text">
             <p>Printing</p>
             <p className="dots">
@@ -39,6 +48,21 @@ class Print extends React.Component {
     );
   }
 }
-
-export default Print;
-``
+export default connect(
+    (state) => {
+      return {
+        webcam: state.webcam,
+        stateMachine: state.stateMachine
+      }
+    },
+    (dispatch) => {
+      return {
+        changeState: (state) => {
+          dispatch(changeState(state));
+        },
+        setWebcamOutput: (picture) => {
+          dispatch(setWebcamOutput(picture));
+        }
+      }
+    }
+)(Print);

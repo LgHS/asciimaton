@@ -2,6 +2,7 @@
 @import 'tools/font';
 @import 'components/asciimaton-output';
 @import 'components/modal';
+@import 'components/webcam';
 @import 'pages/home';
 @import 'pages/live';
 @import 'pages/print';
@@ -15,7 +16,7 @@ html {
 
 body {
   background-color: black;
-  color: white;
+  color: #00ff00;
   font-family: "Karmatic Arcade", monospace;
   overflow: hidden;
 }
@@ -48,12 +49,12 @@ main {
   width: 100vw;
 
   .page__text {
-    font-size: 3rem;
+    font-size: 6rem;
     padding: 0 2rem;
-    align-self: flex-end;
-    margin-bottom: 200px;
+    align-self: center;
+    justify-self: center;
+    //margin-bottom: 200px;
     position: relative;
     text-align: center;
-    text-shadow: 0 3px 0 rgba(black, .7);
   }
 }

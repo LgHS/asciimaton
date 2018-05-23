@@ -1,11 +1,8 @@
-.page__live {
+.page.page__live {
   .countdown {
-    bottom: 200px !important;
-    font-size: 10rem !important;
-    margin-bottom: 0 !important;
-    position: absolute !important;
-    //align-self: center;
-    //justify-self: flex-end;
-    //margin-top: 200px;
+    font-size: 20rem;
+    position: absolute;
+    align-self: center;
+    justify-self: center;
   }
 }

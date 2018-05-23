@@ -76,7 +76,7 @@ class Webcam extends React.Component {
 
   render() {
     return (
-        <div>
+        <div className="webcam">
           <canvas className="webcam-canvas" ref="webcamCanvas" height={this.props.height} width={this.props.width}/>
         </div>
     )
