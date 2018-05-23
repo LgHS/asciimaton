@@ -3,7 +3,6 @@ import * as actions from "../actions/actions";
 const initialState = {
   asciimatonOutput: null,
   webcamOutput: null,
-
 };
 
 const picture = (state = initialState, action) => {

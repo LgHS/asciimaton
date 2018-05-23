@@ -5,11 +5,10 @@ _Requires Python3.5.3+_
 ## Install
 
 ```
-virtualenv -p python3 py-middleware
 cd py-middleware
+virtualenv -p python3 .
 . bin/activate
 pip install -r requirements.txt
-sudo adduser $USER gpio  # For GPIO
 sudo usermod -a -G dialout $USER  # For pySerial
 cd ../src/python
 make

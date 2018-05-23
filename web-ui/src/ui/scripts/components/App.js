@@ -4,7 +4,6 @@ import "../../styles/main.scss";
 
 import Communication from '../communication/Communication';
 
-
 // app component
 export default class App extends React.Component {
   // render

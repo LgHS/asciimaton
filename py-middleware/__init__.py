@@ -17,14 +17,6 @@ try:
 except ImportError as e:
     print('Failed to load asciimaton')
 
-try:
-    import RPi.GPIO as GPIO
-except (RuntimeError, ImportError):
-    print('-- Not on a Raspberry Pi / No GPIO module found')
-    print()
-
-    GPIO = None
-
 # LEDS
 class PI_OUT(Enum):
     L_RED = 27
@@ -55,32 +47,6 @@ _LEDS = {
     'L_BLUE': 0,
     'L_GREEN': 0
 }
-
-
-class GPIOHandler:
-    @staticmethod
-    def init(GPIO):
-        if not GPIO:
-            return
-
-        print("Initializing GPIO")
-
-        GPIO.setmode(GPIO.BCM)
-        # GPIO.setmode(GPIO.BOARD)
-
-        # Init to HIGH for testing purpose
-        GPIO.setup([p.value for p in PI_OUT], GPIO.OUT, initial=GPIO.HIGH)
-        GPIO.setup([p.value for p in PI_IN], GPIO.IN)
-
-        sleep(1.5)
-
-        GPIO.output([p.value for p in PI_OUT], GPIO.LOW)
-
-
-    @staticmethod
-    def cleanup(GPIO):
-        if GPIO:
-            GPIO.cleanup()
 
 
 @app.route('/test/')
@@ -204,19 +170,16 @@ def on_led_state_change(json):
     # print('Turning {} {}'.format(states_name[json['state']], led))
     print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
-    if GPIO:
-        GPIO.output(LEDS[led].value, state)
+    color = json['color'][0]
+
+    if state:
+        color = color.upper()
     else:
-        color = json['color'][0]
+        color = color.lower()
 
-        if state:
-            color = color.upper()
-        else:
-            color = color.lower()
+    # print(color.encode('utf-8'), state)
 
-        # print(color.encode('utf-8'), state)
-
-        ser.write(color.encode('utf-8'))
+    ser.write(color.encode('utf-8'))
 
 @socketio.on('button.isPressed', namespace="/control")
 def on_button_press(json):
@@ -278,6 +241,9 @@ def _printer_print():
                 '\r'.join(el) for el in zip(*([txt_split]*THICKNESS))
             ) + '\n'
 
+        # print 8 more lines to position paper correctly for next photo
+        txt += "\n\n\n\n\n\n\n\n"
+
         try:
             with open('/dev/usb/lp0', "w") as printer:
                 try:
@@ -314,8 +280,6 @@ if __name__ == '__main__':
     THICKNESS = 1
 
     try:
-        GPIOHandler.init(GPIO)
-
         try:
             ser = serial.Serial(sys.argv[1], 115200)
             # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
@@ -334,5 +298,4 @@ if __name__ == '__main__':
         # socketio.run(app, host=ADDR[0], port=ADDR[1])
         socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
     finally:
-        GPIOHandler.cleanup(GPIO)
         ser.close()
