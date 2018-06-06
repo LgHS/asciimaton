@@ -2,14 +2,12 @@ import base64
 import datetime
 import io
 import operator
-import subprocess
 import sys
-from enum import Enum
-from time import sleep
 
 from flask import Flask, render_template
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO, emit
 from PIL import Image
+
 import serial
 
 try:
@@ -17,29 +15,13 @@ try:
 except ImportError as e:
     print('Failed to load asciimaton')
 
-# LEDS
-class PI_OUT(Enum):
-    L_RED = 27
-    L_BLUE = 17
-    L_GREEN = 22
-
-
-# Buttons
-class PI_IN(Enum):
-    B_RED = 24
-    B_BLUE = 25
-    B_GREEN = 23
-
 #######
 
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='threading')
-# socketio = SocketIO(app)
 
 # We'll assume we didn't crash
 is_rdy = True
-
-LEDS = PI_OUT
 
 # (Presumably) current state of LEDS
 _LEDS = {
@@ -158,8 +140,6 @@ def on_webcam_processing(json):
 def on_led_state_change(json):
     # ({'color': 'RED', 'state': 'high'})
 
-    states_name = {'high': 'on', 'low': 'off'}
-
     led = 'L_{}'.format(json['color'].upper())
 
     states = {'high': 1, 'low': 0}
@@ -167,6 +147,7 @@ def on_led_state_change(json):
 
     _LEDS[led] = state
 
+    # states_name = {'high': 'on', 'low': 'off'}
     # print('Turning {} {}'.format(states_name[json['state']], led))
     print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
@@ -180,6 +161,7 @@ def on_led_state_change(json):
     # print(color.encode('utf-8'), state)
 
     ser.write(color.encode('utf-8'))
+
 
 @socketio.on('button.isPressed', namespace="/control")
 def on_button_press(json):
@@ -257,6 +239,8 @@ def _printer_print():
         socketio.emit('printer.isReady', is_rdy, namespace="/ui")
 
 
+ser = None
+
 if __name__ == '__main__':
     # ADDR = ('127.0.0.1', 54321)
     ADDR = ('0.0.0.0', 54321)
@@ -292,10 +276,12 @@ if __name__ == '__main__':
             socketio.start_background_task(target=buttonListener)
         except IndexError:
             print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
-            sys.exit(1)
 
         print("Starting websocket server")
         # socketio.run(app, host=ADDR[0], port=ADDR[1])
         socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
     finally:
-        ser.close()
+        try:
+            ser.close()
+        except AttributeError:
+            pass
