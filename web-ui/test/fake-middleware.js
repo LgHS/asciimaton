@@ -160,4 +160,4 @@ const _displayButtons = (colors) => {
 // init REPL comands
 defineReplCommands();
 // init server
-server.listen(54321);
+server.listen(54321, "0.0.0.0");

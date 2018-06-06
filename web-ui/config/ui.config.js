@@ -8,6 +8,10 @@ module.exports = {
     'babel-polyfill',
     './ui/scripts/main.js',
   ],
+  devServer: {
+    host: "0.0.0.0",
+    disableHostCheck: true
+  },
   output: {
     filename: '[name].js',
     publicPath: '/static/ui/',

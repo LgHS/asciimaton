@@ -77,7 +77,7 @@ class Communication extends React.Component {
       socket.removeAllListeners('connect_error');
     }
 
-    socket = io.connect(`http://${socketServer.url}:${socketServer.port}/ui`);
+    socket = io.connect(`/${socketServer.port}/ui`);
     window.socket = socket;
 
     socket.on('connect', () => {
