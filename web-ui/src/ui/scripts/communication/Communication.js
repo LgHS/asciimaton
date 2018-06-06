@@ -25,6 +25,7 @@ class Communication extends React.Component {
       // update callback when button is pressed based on new state
       socket.removeAllListeners("button.isPressed");
       socket.on('button.isPressed', (data) => {
+        console.log('button.isPressed');
         const nextState = nextProps.stateMachine.buttons[data.color].next;
         const payload = nextProps.stateMachine.buttons[data.color].payload;
         if (nextState) {
