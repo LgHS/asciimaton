@@ -1,5 +1,9 @@
 import React from "react";
 
+// Cross-browser compatibility
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
+
 class Webcam extends React.Component {
   componentDidMount() {
     const self = this;
@@ -26,6 +30,8 @@ class Webcam extends React.Component {
           video: self.video,
         });
       }, errBack);
+    } else {
+      console.log('Native device media streaming (getUserMedia) not supported in this browser.');
     }
   }
 
