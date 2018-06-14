@@ -1,4 +1,5 @@
-
+#include <Arduino.h>
+#include <SoftwareSerial.h>
 #define DEBOUNCE    30
 
 typedef unsigned char uint8_t;
@@ -9,9 +10,14 @@ static const uint8_t chars  [] = {  'R',      'G',      'B'     };
 static const uint8_t leds   [] = { /*R*/ 12, /*G*/ 11, /*B*/ 10 };
 static uint8_t leds_in[0x100] = { 0 };
 
+
+SoftwareSerial coinsSerial(5,7); // RX, TX
+int secondsRemaining = 0;
+
 void setup()
 {
     Serial.begin(115200);
+    coinsSerial.begin(4800);
 
     for ( uint8_t i = 0; i < 3; i++ )
     {
