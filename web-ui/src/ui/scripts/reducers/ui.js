@@ -5,7 +5,7 @@ const initialState = {
   isSettingsModalOpened: false,
   isSocketConnected: false,
   socketServer: {
-    url: 'localhost',
+    url: window.location.hostname,
     port: '54321'
   },
 };

@@ -77,7 +77,7 @@ class Communication extends React.Component {
       socket.removeAllListeners('connect_error');
     }
 
-    socket = io.connect(`http://${socketServer.url}:${socketServer.port}/ui`);
+    socket = io.connect(`${socketServer.url}:${socketServer.port}/ui`);
     window.socket = socket;
 
     socket.on('connect', () => {
@@ -85,7 +85,8 @@ class Communication extends React.Component {
       self.props.setSocketConnected(true);
     });
 
-    socket.on('connect_error', function () {
+    socket.on('connect_error', function (e) {
+      console.error('socket could not connect', e);
       self._changeState(STATES.NOT_CONNECTED);
       self.props.setSocketConnected(false);
     });

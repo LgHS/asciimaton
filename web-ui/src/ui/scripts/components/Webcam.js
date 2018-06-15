@@ -1,5 +1,9 @@
 import React from "react";
 
+// Cross-browser compatibility
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
+
 class Webcam extends React.Component {
   componentDidMount() {
     const self = this;
@@ -26,6 +30,8 @@ class Webcam extends React.Component {
           video: self.video,
         });
       }, errBack);
+    } else {
+      console.log('Native device media streaming (getUserMedia) not supported in this browser.');
     }
   }
 
@@ -34,10 +40,10 @@ class Webcam extends React.Component {
     const loop = () => {
       if (canvas) {
         const context = canvas.getContext("2d");
-        context.rotate(90 * Math.PI / 180);
+        // context.rotate(90 * Math.PI / 180);
         context.drawImage(video, 0, 0, canvas.height, canvas.width);
-        context.setTransform(-1, 0, 0, 1, 0, 0);
-        context.filter = `contrast(${100 + (contrastModifier * 10)}%) grayscale(100%) brightness(${100 + (brightnessModifier * 10)}%)`;
+        // context.setTransform(-1, 0, 0, 1, 0, 0);
+        // context.filter = `contrast(${100 + (contrastModifier * 10)}%) grayscale(100%) brightness(${100 + (brightnessModifier * 10)}%)`;
       }
       this.animationFrame = requestAnimationFrame(loop);
     };

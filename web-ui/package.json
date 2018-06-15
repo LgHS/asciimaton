@@ -7,12 +7,12 @@
   "author": "Jonathan Berger <john@lghs.be>",
   "license": "MIT",
   "scripts": {
-    "start": "NODE_ENV=dev webpack-dev-server --content-base build/templates --config ./config/ui.config.js --progress --colors --hot --inline",
-    "start:controller": "NODE_ENV=dev webpack-dev-server --port 8081 --content-base build/templates --config ./config/controller.config.js --progress --colors --hot --inline",
-    "ui:build": "webpack -p --config ./config/ui.build.config.js --progress --colors",
-    "controller:build": "webpack -p --config ./config/controller.build.config.js --progress --colors",
-    "ui:prod": "webpack -p --config ./config/ui.prod.config.js --progress --colors",
-    "controller:prod": "webpack -p --config ./config/controller.prod.config.js --progress --colors"
+    "start": "NODE_ENV=dev webpack-dev-server --content-base build/templates --config ./webpack/ui.config.js --progress --colors --hot --inline",
+    "start:controller": "NODE_ENV=dev webpack-dev-server --port 8081 --content-base build/templates --config ./webpack/controller.config.js --progress --colors --hot --inline",
+    "ui:build": "webpack -p --config ./webpack/ui.build.config.js --progress --colors",
+    "controller:build": "webpack -p --config ./webpack/controller.build.config.js --progress --colors",
+    "ui:prod": "webpack -p --config ./webpack/ui.prod.config.js --progress --colors",
+    "controller:prod": "webpack -p --config ./webpack/controller.prod.config.js --progress --colors"
   },
   "devDependencies": {
     "babel-core": "6.24.1",

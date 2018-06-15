@@ -239,7 +239,14 @@ def _printer_print():
         socketio.emit('printer.isReady', is_rdy, namespace="/ui")
 
 
-ser = None
+class FakeSerial:
+    @staticmethod
+    def write(msg: str):
+        print("ERROR: No serial found!")
+        print("Message sent: {}".format(msg))
+
+
+ser = FakeSerial()
 
 if __name__ == '__main__':
     # ADDR = ('127.0.0.1', 54321)
