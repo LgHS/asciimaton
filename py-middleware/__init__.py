@@ -13,7 +13,9 @@ import serial
 try:
     import asciimaton
 except ImportError as e:
-    print('Failed to load asciimaton')
+    print('Failed to load asciimaton!')
+    print("Switching to Printer filter.")
+    asciimaton = None
 
 #######
 
@@ -66,63 +68,75 @@ def on_connect():
 def on_webcam_processing(json):
     print('webcam.output')
 
-    json = json['picture'][len('data:image/png;base64,'):]
+    print(json['picture'][:128])
 
-    print(json[:128])
+    json = json['picture'][len('data:image/png;base64,'):]
 
     img = base64.b64decode(
         json
     )
 
-    # with open('static/lena420.pgm', 'rb') as f:
-    #    foo = f.read()
-    # print(pgm == foo)
+    if asciimaton is not None:
+        # with open('static/lena420.pgm', 'rb') as f:
+        #    foo = f.read()
+        # print(pgm == foo)
 
-    CONVERT = True
+        CONVERT = True
 
-    if not CONVERT:
-        pgm = img
+        if not CONVERT:
+            pgm = img
+        else:
+            data = io.BytesIO(img)
+            with Image.open(data) as img:
+                out_pgm = io.BytesIO()
+
+                # Format for .pgm
+                img.convert('L').save(out_pgm, 'PPM')
+
+                out_pgm.seek(0)
+                pgm = out_pgm.read()
+
+                # with open('static/test-pgn2pgm.pgm', 'wb') as f:
+                #    f.write(pgm)
+
+        now = datetime.datetime.now()
+        watermark = '\n'.join(WATERMARKS).format(now, DATETIME='{:%Y-%m-%d %H:%M}'.format(now))
+
+        justifications = {'RIGHT': 'rjust', 'CENTER': 'center'}
+
+        if JUSTIFICATION in justifications:
+            watermark = watermark.splitlines()
+
+            justifier = operator.methodcaller(
+                justifications[JUSTIFICATION],
+                max(*[len(line) for line in watermark])
+            )
+
+            watermark = '\n'.join(map(justifier, watermark))
+
+        txt = asciimaton.img2txt(pgm, watermark)
+        print('img2txt done!')
+
+        new_pgm = asciimaton.txt2img(txt)
+        print('txt2img done!')
+
+        with open('current.txt', 'w', encoding='utf-8') as f:
+            f.write(txt)
+
+        # with open('static/current.pgm', 'wb') as f:
+        #    f.write(new_pgm)
+
+        data = io.BytesIO(new_pgm)
     else:
+        pil_image = Image.open(io.BytesIO(img))
+
+        # Apply printer filter here.
+        # pil_image.
+
+        pil_image.save("current.png")
+
         data = io.BytesIO(img)
-        with Image.open(data) as img:
-            out_pgm = io.BytesIO()
 
-            # Format for .pgm
-            img.convert('L').save(out_pgm, 'PPM')
-
-            out_pgm.seek(0)
-            pgm = out_pgm.read()
-
-            # with open('static/test-pgn2pgm.pgm', 'wb') as f:
-            #    f.write(pgm)
-
-    now = datetime.datetime.now()
-    watermark = '\n'.join(WATERMARKS).format(now, DATETIME='{:%Y-%m-%d %H:%M}'.format(now))
-
-    justifications = {'RIGHT': 'rjust', 'CENTER': 'center'}
-
-    if JUSTIFICATION in justifications:
-        watermark = watermark.splitlines()
-
-        justifier = operator.methodcaller(
-            justifications[JUSTIFICATION],
-            max(*[len(line) for line in watermark])
-        )
-
-        watermark = '\n'.join(map(justifier, watermark))
-
-    txt = asciimaton.img2txt(pgm, watermark)
-    print('img2txt done!')
-    new_pgm = asciimaton.txt2img(txt)
-    print('txt2img done!')
-
-    with open('current.txt', 'w', encoding='utf-8') as f:
-        f.write(txt)
-
-    # with open('static/current.pgm', 'wb') as f:
-    #    f.write(new_pgm)
-
-    data = io.BytesIO(new_pgm)
     with Image.open(data) as img:
         out_png = io.BytesIO()
         img.convert('RGB').save(out_png, 'PNG')
@@ -197,13 +211,22 @@ def on_printer_set_line_thickness(json):
 def on_asciimaton_save():
     print('asciimaton.save')
 
-    with open('current.txt', 'r', encoding='utf-8') as txt_file:
-        txt = txt_file.read()
+    if asciimaton is None:
+        with open("current.png", "rb") as png_file:
+            png = png_file.read()
 
-        # TODO: Use copy instead? :)
-        filename = 'upload/{:%Y-%m-%d %H:%M:%S}.txt'.format(datetime.datetime.now())
-        with open(filename, 'w+', encoding='utf-8') as f:
-            f.write(txt)
+            # TODO: Use copy instead? :)
+            filename = 'upload/batch/{:%Y-%m-%d %Hh%Mm %Ss}.png'.format(datetime.datetime.now())
+            with open(filename, 'wb+') as f:
+                f.write(png)
+    else:
+        with open('current.txt', 'r', encoding='utf-8') as txt_file:
+            txt = txt_file.read()
+
+            # TODO: Use copy instead? :)
+            filename = 'upload/{:%Y-%m-%d %Hh%Mm %Ss}.txt'.format(datetime.datetime.now())
+            with open(filename, 'w+', encoding='utf-8') as f:
+                f.write(txt)
 
 
 @socketio.on('printer.print', namespace="/ui")
@@ -214,8 +237,17 @@ def on_printer_print():
 
 
 def _printer_print():
-    with open('current.txt', 'r', encoding='utf-8') as txt_file:
-        txt = txt_file.read()
+    printer_func = None
+    txt = None
+
+    if asciimaton is None:
+        print("ERROR: Unable to print picture! Printing in \"printer filter\" mode not implemented!")
+
+        return
+    else:
+        with open('current.txt', 'r', encoding='utf-8') as txt_file:
+            txt = txt_file.read()
+
         txt_split = txt.split('\n')
 
         if THICKNESS > 1:
@@ -226,17 +258,21 @@ def _printer_print():
         # print 8 more lines to position paper correctly for next photo
         txt += "\n\n\n\n\n\n\n\n"
 
-        try:
-            with open('/dev/usb/lp0', "w") as printer:
-                try:
-                    printer.write('\x1B0\x1BM'+txt)
-                except OSError as e:
-                    print(e)
-        except FileNotFoundError as e:
-            print('ERROR!\nCan\'t seem to contact printer')
-            emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
+        def printerFunc(printer, txt):
+            try:
+                printer.write('\x1B0\x1BM' + txt)
+            except OSError as e:
+                print(e)
 
-        socketio.emit('printer.isReady', is_rdy, namespace="/ui")
+    try:
+        with open('/dev/usb/lp0', "w") as printer:
+            printer_func(printer, txt)
+    except FileNotFoundError as e:
+        print('ERROR!\nCan\'t seem to contact printer')
+        emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
+
+    # Probably sent too soon! Estimate printing time. (Doable with the asciimaton printer + line thickness)
+    socketio.emit('printer.isReady', is_rdy, namespace="/ui")
 
 
 class FakeSerial:
