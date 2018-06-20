@@ -130,8 +130,8 @@ def on_webcam_processing(json):
         data = Image.open(io.BytesIO(new_pgm))
     else:
         pil_image = Image.open(io.BytesIO(img)).convert('LA')
+        source_w, source_h = pil_image.size
 
-        alpha = .7
         hover_list = ["hover_1.jpg"]
         i = random.randint(0, len(hover_list)-1)
         hover_file = Image.open(hover_list[i]).convert('LA')
@@ -139,9 +139,14 @@ def on_webcam_processing(json):
         # Images must have the same mode and size to be blended together.
         hover_file = hover_file.resize(pil_image.size, Image.ANTIALIAS)
 
-        watermark = Image.open("watermark.png")
-        source_w, source_h = pil_image.size
         hover_w, hover_h = hover_file.size
+
+        watermark = Image.open("watermark.png")
+        watermark.thumbnail(
+            (source_w * WATERMARK_RATIO, source_h * WATERMARK_RATIO),
+            Image.ANTIALIAS
+        )
+
         watermark_w, watermark_h = watermark.size
 
         pil_image = ImageEnhance.Contrast(pil_image).enhance(1.5)
@@ -150,14 +155,19 @@ def on_webcam_processing(json):
         pil_image = Image.blend(
             pil_image,
             hover_file,
-            alpha
+            COPIER_FILTER_ALPHA
         )
         pil_image = pil_image.convert("1")
-        # pil_image.paste(watermark, (source_w - watermark_w - 25, source_h - watermark_h - 25))
+        pil_image.paste(
+            watermark,
+            (
+                source_w - watermark_w - 25,  # (1 - watermark_relPos[0]) * source_w,
+                source_h - watermark_h - 25,  # (1 - watermark_relPos[1]) * source_h
+            )
+        )
 
         pil_image.save("current.png")
 
-        # data = io.BytesIO(img)
         data = pil_image
 
     with data as img:
@@ -328,6 +338,10 @@ if __name__ == '__main__':
     JUSTIFICATION = 'CENTER'
 
     THICKNESS = 1
+
+    COPIER_FILTER_ALPHA = .3
+    WATERMARK_RATIO = 1 / 3
+    WATERMARK_REL_POS = (.9, .9)
 
     try:
         try:
