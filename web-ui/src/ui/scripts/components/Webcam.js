@@ -50,6 +50,15 @@ class Webcam extends React.Component {
     this.animationFrame = requestAnimationFrame(loop);
   }
 
+  getSnapshot() {
+    if(!this.canvas || !this.context) {
+      console.warn('No canvas or context found for snapshot, aborting');
+      return;
+    }
+
+    return this.canvas.toDataURL();
+  }
+
   getResizedSnapshot() {
     if (!this.canvas || !this.context) {
       console.warn('No canvas or context found for snapshot, aborting');

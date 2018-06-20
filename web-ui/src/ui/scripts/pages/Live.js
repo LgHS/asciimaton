@@ -27,8 +27,8 @@ class Capture extends React.Component {
           self.setState({countDown: null});
           clearInterval(countDownInterval);
           // send output to server
-          const smallSnapshot = self.webcam.getResizedSnapshot();
-          self.props.setWebcamOutput(smallSnapshot);
+          const snapshot = self.webcam.getSnapshot();
+          self.props.setWebcamOutput(snapshot);
 
           // wait for server response
           self.props.changeState(STATES.WAITING);
