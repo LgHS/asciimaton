@@ -1,11 +1,37 @@
 .page__home {
   .logo {
-    width: 473px;
-    height: 226px;
+    width: 600px;
+    height: 338px;
+    animation: shake 5s cubic-bezier(.36,.07,.19,.97) infinite;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
   }
 
   .page__text {
     font-size: 1rem !important;
     letter-spacing: .3em;
+  }
+
+  @keyframes shake {
+    1%, 9% {
+      transform: translate3d(-3px, 0, 0);
+    }
+
+    2%, 8% {
+      transform: translate3d(5px, -6px, 0);
+    }
+
+    3%, 5%, 7% {
+      transform: translate3d(-10px, 0, 0);
+    }
+
+    4%, 6% {
+      transform: translate3d(8px, 5px, 0);
+    }
+
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
   }
 }

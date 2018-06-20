@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Logo from '../../assets/images/logo.png';
+import Logo from '../../assets/images/logo-fesse_rose_600.png';
 import {connect} from "react-redux";
 
 const Home = ({isSocketConnected}) => {
