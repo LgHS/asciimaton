@@ -2,11 +2,12 @@ import base64
 import datetime
 import io
 import operator
+import random
 import sys
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 import serial
 
@@ -126,18 +127,40 @@ def on_webcam_processing(json):
         # with open('static/current.pgm', 'wb') as f:
         #    f.write(new_pgm)
 
-        data = io.BytesIO(new_pgm)
+        data = Image.open(io.BytesIO(new_pgm))
     else:
-        pil_image = Image.open(io.BytesIO(img))
+        pil_image = Image.open(io.BytesIO(img)).convert('LA')
 
-        # Apply printer filter here.
-        # pil_image.
+        alpha = .7
+        hover_list = ["hover_1.jpg"]
+        i = random.randint(0, len(hover_list)-1)
+        hover_file = Image.open(hover_list[i]).convert('LA')
+
+        # Images must have the same mode and size to be blended together.
+        hover_file = hover_file.resize(pil_image.size, Image.ANTIALIAS)
+
+        watermark = Image.open("watermark.png")
+        source_w, source_h = pil_image.size
+        hover_w, hover_h = hover_file.size
+        watermark_w, watermark_h = watermark.size
+
+        pil_image = ImageEnhance.Contrast(pil_image).enhance(1.5)
+        pil_image = ImageEnhance.Brightness(pil_image).enhance(1.5)
+
+        pil_image = Image.blend(
+            pil_image,
+            hover_file,
+            alpha
+        )
+        pil_image = pil_image.convert("1")
+        # pil_image.paste(watermark, (source_w - watermark_w - 25, source_h - watermark_h - 25))
 
         pil_image.save("current.png")
 
-        data = io.BytesIO(img)
+        # data = io.BytesIO(img)
+        data = pil_image
 
-    with Image.open(data) as img:
+    with data as img:
         out_png = io.BytesIO()
         img.convert('RGB').save(out_png, 'PNG')
         out_png.seek(0)
@@ -163,7 +186,7 @@ def on_led_state_change(json):
 
     # states_name = {'high': 'on', 'low': 'off'}
     # print('Turning {} {}'.format(states_name[json['state']], led))
-    print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
+    print(' '.join(['{}: {}'.format(k, v) for k, v in _LEDS.items()]))
 
     color = json['color'][0]
 
