@@ -274,8 +274,16 @@ def _printer_print():
     txt = None
 
     if asciimaton is None:
-        print("ERROR: Unable to print picture! Printing in \"printer filter\" mode not implemented!")
+        import os.path
+        if not os.path.isFile("current.png"):
+            print("Already printed! Aborting")
+            return
 
+        import os
+        os.system("lp -d HP_LaserJet_1320_series current.png")
+        os.remove("current.png")
+
+        socketio.emit('printer.isReady', is_rdy, namespace="/ui")
         return
     else:
         with open('current.txt', 'r', encoding='utf-8') as txt_file:
@@ -305,7 +313,6 @@ def _printer_print():
         emit('error', {'msg': 'Can\'t contact printer!'}, broadcast='/ui')
 
     # Probably sent too soon! Estimate printing time. (Doable with the asciimaton printer + line thickness)
-    socketio.emit('printer.isReady', is_rdy, namespace="/ui")
 
 
 class FakeSerial:
