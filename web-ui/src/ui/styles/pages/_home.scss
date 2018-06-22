@@ -1,11 +1,16 @@
 .page__home {
   .logo {
     width: 600px;
-    height: 338px;
+    max-width: 80%;
     animation: shake 3s cubic-bezier(.36,.07,.19,.97) infinite;
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     perspective: 1000px;
+
+    img {
+      width: 100%;
+      height: auto;
+    }
   }
 
   .page__text {
