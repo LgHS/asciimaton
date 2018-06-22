@@ -41,7 +41,7 @@ module.exports = {
       },
       {
         test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/,
-        use: 'url-loader'
+        use: 'file-loader?name=[name].[ext]&outputPath=fonts/'
       },
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
