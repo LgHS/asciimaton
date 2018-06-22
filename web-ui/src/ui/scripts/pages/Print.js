@@ -41,7 +41,7 @@ class Print extends React.Component {
             <p className="dots">
               &nbsp;
               {".".repeat(this.state.dotCount)}
-              &nbsp;;,
+              &nbsp;
             </p>
           </div>
         </div>

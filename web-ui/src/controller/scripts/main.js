@@ -31,6 +31,10 @@ const handleReloadClick = () => {
   socket.emit('ui.reload');
 };
 
+const handleBatchClick = () => {
+  socket.emit('printer.batchPrint');
+};
+
 ReactDOM.render((
     <main className='app'>
       <section className="app-section app-section__buttons">
@@ -39,14 +43,11 @@ ReactDOM.render((
         <Button onClick={handleButtonClick} color="blue" label="PRINT"/>
       </section>
 
-      <section className="app-section app-section__webcam-filters">
-        <WebcamFilter onClick={handleFilterClick} filter="brightness" />
-        <WebcamFilter onClick={handleFilterClick} filter="contrast" />
-      </section>
-
-      <section className='app-section app-section__line-thickness'>
-        <LineThickness onClick={handleThicknessClick} />
-      </section>
+      <section className="app-section">
+        <button onClick={(e) => { handleBatchClick(); e.preventDefault(); }} type="button">
+          Batch print
+        </button>
+       </section>
 
       <section className="app-section app-section__reload">
         <Reload onClick={handleReloadClick} />

@@ -16,8 +16,10 @@ html {
 
 body {
   background-color: #000;
-  color: #00ff00;
-  //font-family: "Karmatic Arcade", monospace;
+  color: #F7C1C1;
+  font-family: "fessee", monospace;
+  font-weight: bold;
+  text-transform: uppercase;
   overflow: hidden;
 }
 
@@ -50,7 +52,7 @@ main {
 }
 
 .container {
-  background-color: white;
+  //background-color: white;
 }
 
 .page {

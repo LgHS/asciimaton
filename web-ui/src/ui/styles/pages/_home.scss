@@ -2,7 +2,7 @@
   .logo {
     width: 600px;
     height: 338px;
-    animation: shake 5s cubic-bezier(.36,.07,.19,.97) infinite;
+    animation: shake 3s cubic-bezier(.36,.07,.19,.97) infinite;
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
     perspective: 1000px;
@@ -14,24 +14,24 @@
   }
 
   @keyframes shake {
-    1%, 9% {
-      transform: translate3d(-3px, 0, 0);
+    2%, 18% {
+      transform: translate3d(-3px, 0, 0) rotate(0);
     }
 
-    2%, 8% {
-      transform: translate3d(5px, -6px, 0);
+    4%, 16% {
+      transform: translate3d(5px, -6px, 0) rotate(2deg);
     }
 
-    3%, 5%, 7% {
-      transform: translate3d(-10px, 0, 0);
+    6%, 10%, 14% {
+      transform: translate3d(-10px, 0, 0) rotate(-2deg);
     }
 
-    4%, 6% {
-      transform: translate3d(8px, 5px, 0);
+    8%, 12% {
+      transform: translate3d(8px, 5px, 0) rotate(0);
     }
 
     100% {
-      transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0) rotate(0);
     }
   }
 }
