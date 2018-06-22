@@ -46,7 +46,7 @@ main {
 .wrapper {
   margin: auto;
   overflow: hidden;
-  width: calc(100vh / 1.414);
+  max-width: calc(100vh / 1.414);
   height: 100vh;
   position: relative;
 }
