@@ -1,3 +1,5 @@
 upload/*
 current.txt
 current.png
+.Python
+pip-selfcheck.json
