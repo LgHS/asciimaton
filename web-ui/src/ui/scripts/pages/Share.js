@@ -5,9 +5,9 @@ const Share = () => (
     <div className='page page__share'>
       <AsciimatonOutput transparency  />
       <p className='page__text'>
-        Share on Facebook ? <br/>
+        Affichez vous<br/>
         <span className="link">
-          facebook.com/liegehackerspace/
+          Voulez-vous faire partie du mur à cul ?
         </span>
       </p>
     </div>
