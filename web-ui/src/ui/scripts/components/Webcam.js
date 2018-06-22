@@ -41,7 +41,7 @@ class Webcam extends React.Component {
       if (canvas) {
         const context = canvas.getContext("2d");
         context.rotate(90 * Math.PI / 180);
-        context.drawImage(video, 0, 0, canvas.height, canvas.width);
+        context.drawImage(video, 0, 0, 1024, 768);
         context.setTransform(-1, 0, 0, 1, 0, 0);
         // context.filter = `contrast(${100 + (contrastModifier * 10)}%) grayscale(100%) brightness(${100 + (brightnessModifier * 10)}%)`;
       }

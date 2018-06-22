@@ -9,6 +9,7 @@ import WebcamFilter from "./components/WebcamFilter";
 import io from 'socket.io-client';
 
 const socket = io.connect(`${window.socketUrl}/control`);
+
 window.socket = io.connect(`${window.socketUrl}/ui`);
 
 const handleButtonClick = (color) => {

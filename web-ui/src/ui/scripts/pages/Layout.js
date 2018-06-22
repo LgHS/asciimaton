@@ -11,7 +11,7 @@ import DebugBar from "../components/DebugBar";
 const DefaultLayout = ({component: Component, ...rest}) => {
   return (
       <Route {...rest} render={matchProps => (
-          <main className="container">
+          <main className="wrapper">
             <Communication/>
             <DebugBar />
             <div className="container">

@@ -15,6 +15,7 @@ html {
 }
 
 body {
+  background-color: #000;
   color: #00ff00;
   //font-family: "Karmatic Arcade", monospace;
   overflow: hidden;
@@ -40,12 +41,24 @@ main {
   width: 100vw;
 }
 
+.wrapper {
+  margin: auto;
+  overflow: hidden;
+  width: calc(100vh / 1.414);
+  height: 100vh;
+  position: relative;
+}
+
+.container {
+  background-color: white;
+}
+
 .page {
   align-items: center;
   display: flex;
   height: 100vh;
   justify-content: center;
-  width: 100vw;
+  //width: 100vw;
 
   .page__text {
     font-size: 6rem;

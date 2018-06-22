@@ -2,12 +2,17 @@ const {resolve} = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+
 module.exports = {
   context: resolve(__dirname, '../src'),
   entry: [
     'babel-polyfill',
     './controller/scripts/main.js'
   ],
+  devServer: {
+    host: "0.0.0.0",
+    disableHostCheck: true
+  },
   output: {
     filename: '[name].js',
     publicPath: '/static/controller/',

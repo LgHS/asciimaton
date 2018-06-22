@@ -13,7 +13,7 @@ module.exports = {
   ],
   output: {
     filename: 'main.js',
-    path: resolve(__dirname, '../../py-middleware/static/controller')
+    path: resolve(__dirname, '../build/static/controller')
   },
   devtool: false,
   module: {

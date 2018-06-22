@@ -3,6 +3,7 @@ import * as webcamActions from "../actions/webcamActions";
 import {INCREASE_BRIGHTNESS} from "../actions/webcamActions";
 
 const initialState = {
+  // width: 1024 / 1.414, // A4
   width: 768,
   height: 1024,
   horizontal_crop: 30,

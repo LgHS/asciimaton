@@ -8,7 +8,7 @@ const WebcamOutput = ({asciimatonOutput, transparency}) => {
 
   return (
       <div className={cls}>
-        <img src={asciimatonOutput} width={768} height={768/0.707}/>
+        <img src={asciimatonOutput} width={1024/1.414} height={1024}/>
       </div>
   );
 };
