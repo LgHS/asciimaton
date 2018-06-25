@@ -23,6 +23,12 @@ class Webcam extends React.Component {
       navigator.getUserMedia(videoObject, (stream) => {
         self.video.src = window.URL.createObjectURL(stream);
         self.video.play();
+
+        // FIXME very very ugly
+        if(window.socket) {
+          window.socket.emit('forceV4l2Settings');
+        }
+
         self._initAnimationLoop({
           brightnessModifier: self.props.brightnessModifier,
           canvas: self.canvas,

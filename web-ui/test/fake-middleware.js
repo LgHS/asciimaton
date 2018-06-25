@@ -62,6 +62,10 @@ uiNamespace.on('connection', function (uiClient) {
       replServer.displayPrompt();
     }
   });
+
+  uiClient.on('forceV4l2Settings', () => {
+    console.log('Force V4L2 Settings');
+  });
 });
 
 /**

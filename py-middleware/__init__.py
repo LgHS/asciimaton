@@ -72,6 +72,14 @@ def on_connect():
     emit('printer.isReady', is_rdy, namespace="/ui")
 
 
+@socketio.on('forceV4l2Settings', namespace="/ui")
+def on_force_v4l2_settings():
+    v4l2_setup_script = pathlib.Path("v4l2.sh")
+
+    if v4l2_setup_script.is_file():
+        os.system("./v4l2.sh")
+
+
 @socketio.on('webcam.output', namespace='/ui')
 def on_webcam_processing(json):
     print('webcam.output')
@@ -165,13 +173,12 @@ def on_webcam_processing(json):
 
     emit(
         'asciimaton.output',
-        {'picture': 'data:image/png;base64,'+base64.b64encode(out_png).decode('utf-8')},
+        {'picture': 'data:image/png;base64,' + base64.b64encode(out_png).decode('utf-8')},
         namespace='/ui'
     )
 
 
 def printer_filter(pil_image):
-
     return PRINTER_FILTER
 
 
@@ -268,7 +275,6 @@ def on_printer_print():
 
 @socketio.on('printer.batchPrint', namespace="/control")
 def on_batch_print():
-
     for entry in os.scandir(BATCH_FOLDER):
         _printer_print(path=entry.path)
 
@@ -311,7 +317,7 @@ def _printer_print(path=None):
 
         if THICKNESS > 1:
             txt = '\n'.join(
-                '\r'.join(el) for el in zip(*([txt_split]*THICKNESS))
+                '\r'.join(el) for el in zip(*([txt_split] * THICKNESS))
             ) + '\n'
 
         # print 8 more lines to position paper correctly for next photo
@@ -421,7 +427,7 @@ if __name__ == '__main__':
     SCREEN_SIZE = (768, 1024)
 
     COPIER_FILTER_ALPHA = .5
-    WATERMARK_RATIO = 1/3
+    WATERMARK_RATIO = 1 / 3
     WATERMARK_REL_POS = (.92, .97)
 
     BATCH_FOLDER = 'upload/batch/'

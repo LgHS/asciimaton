@@ -10,6 +10,7 @@ const initialState = {
   vertical_crop: 30,
   brightnessModifier: 8,
   contrastModifier: -2,
+  webcamSettingsForced: false,
 };
 
 const webcam = (state = initialState, action) => {
@@ -44,6 +45,11 @@ const webcam = (state = initialState, action) => {
         contrastModifier: state.contrastModifier - 1
       };
       break;
+    case webcamActions.FORCE_V4L2_SETTINGS:
+      return {
+          ...state,
+        webcamSettingsForced: true
+      }
   }
   return state;
 };

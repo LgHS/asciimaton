@@ -2,7 +2,7 @@ import React from 'react';
 import Webcam from "../components/Webcam";
 import {connect} from "react-redux";
 import {STATE_MACHINE, STATES} from "../reducers/state-machine";
-import {changeState, setWebcamOutput} from "../actions/actions";
+import {changeState, setWebcamOutput, forceV4l2Settings} from "../actions/actions";
 
 class Capture extends React.Component {
   constructor(props) {
@@ -87,6 +87,9 @@ export default connect(
         },
         setWebcamOutput: (picture) => {
           dispatch(setWebcamOutput(picture));
+        },
+        forceV4l2Settings: () => {
+          dispatch(forceV4l2Settings());
         }
       }
     }
