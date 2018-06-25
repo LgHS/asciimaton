@@ -1,15 +1,19 @@
 import base64
 import datetime
 import io
+import logging
 import operator
-import random
+import os
+import pathlib
 import sys
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
-from PIL import Image, ImageEnhance
+from PIL import Image
 
 import serial
+
+CURRENT_PNG = "current.png"
 
 try:
     import asciimaton
@@ -23,7 +27,6 @@ except ImportError as e:
 app = Flask(__name__)
 socketio = SocketIO(app, async_mode='threading')
 
-import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -136,25 +139,10 @@ def on_webcam_processing(json):
         pil_image = Image.open(io.BytesIO(img)).convert('LA')
         source_w, source_h = pil_image.size
 
-        hover_list = ["hover_1.jpg"]
-        i = random.randint(0, len(hover_list)-1)
-        hover_file = Image.open(hover_list[i]).convert('LA')
+        hover_file = printer_filter(pil_image)
 
-        # Images must have the same mode and size to be blended together.
-        hover_file = hover_file.resize(pil_image.size, Image.ANTIALIAS)
-
-        hover_w, hover_h = hover_file.size
-
-        watermark = Image.open("watermark.png")
-        watermark.thumbnail(
-            (source_w * WATERMARK_RATIO, source_h * WATERMARK_RATIO),
-            Image.ANTIALIAS
-        )
-
-        watermark_w, watermark_h = watermark.size
-
-        pil_image = ImageEnhance.Contrast(pil_image).enhance(1.5)
-        pil_image = ImageEnhance.Brightness(pil_image).enhance(1.5)
+        # pil_image = ImageEnhance.Contrast(pil_image).enhance(1.5)
+        # pil_image = ImageEnhance.Brightness(pil_image).enhance(1.5)
 
         pil_image = Image.blend(
             pil_image,
@@ -162,13 +150,8 @@ def on_webcam_processing(json):
             COPIER_FILTER_ALPHA
         )
         pil_image = pil_image.convert("1")
-        pil_image.paste(
-            watermark,
-            (
-                source_w - watermark_w - 25,  # (1 - watermark_relPos[0]) * source_w,
-                source_h - watermark_h - 25,  # (1 - watermark_relPos[1]) * source_h
-            )
-        )
+
+        _apply_watermark(pil_image, source_h, source_w)
 
         pil_image.save("current.png")
 
@@ -185,6 +168,15 @@ def on_webcam_processing(json):
         {'picture': 'data:image/png;base64,'+base64.b64encode(out_png).decode('utf-8')},
         namespace='/ui'
     )
+
+
+def printer_filter(pil_image):
+
+    return PRINTER_FILTER
+
+
+def _apply_watermark(pil_image, source_h, source_w):
+    pil_image.paste(WATERMARK, WATERMARK_REL_POS)
 
 
 @socketio.on('led.changeState', namespace='/ui')
@@ -253,7 +245,8 @@ def on_asciimaton_save():
             png = png_file.read()
 
             # TODO: Use copy instead? :)
-            filename = 'upload/batch/{:%Y-%m-%d %Hh%Mm %Ss}.png'.format(datetime.datetime.now())
+            filename = BATCH_FOLDER + '{datetime:%Y-%m-%d %Hh%Mm %Ss}.png'.format(datetime=datetime.datetime.now())
+
             with open(filename, 'wb+') as f:
                 f.write(png)
     else:
@@ -273,19 +266,40 @@ def on_printer_print():
     socketio.start_background_task(target=_printer_print)
 
 
-def _printer_print():
+@socketio.on('printer.batchPrint', namespace="/control")
+def on_batch_print():
+
+    for entry in os.scandir(BATCH_FOLDER):
+        _printer_print(path=entry.path)
+
+
+def _printer_print(path=None):
     printer_func = None
     txt = None
 
-    if asciimaton is None:
-        import os.path
-        if not os.path.isFile("current.png"):
-            print("Already printed! Aborting")
-            return
+    if path is None:
+        path = CURRENT_PNG
 
-        import os
-        os.system("lp -d HP_LaserJet_1320_series current.png")
-        os.remove("current.png")
+    if asciimaton is None:
+        my_file = pathlib.Path(path)
+
+        if not my_file.is_file():
+            if path is CURRENT_PNG:
+                print("Already printed! Aborting")
+                return
+            else:
+                print("\"{}\" not found or already printed! Aborting!".format(path))
+                return
+
+        os.system("lp -d {} \"{}\"".format(PRINTER_NAME, path))
+
+        if path is CURRENT_PNG:
+            os.remove(CURRENT_PNG)
+        else:
+            os.rename(
+                path,
+                os.path.join(PROCESSED_FOLDER, pathlib.Path(path).name)
+            )
 
         socketio.emit('printer.isReady', is_rdy, namespace="/ui")
         return
@@ -322,12 +336,63 @@ def _printer_print():
 class FakeSerial:
     @staticmethod
     def write(msg: str):
-        return
+        pass
         # print("ERROR: No serial found!")
         # print("Message sent: {}".format(msg))
 
 
 ser = FakeSerial()
+
+
+def start_server():
+    global ser
+    global WATERMARK
+    global PRINTER_FILTER
+    global WATERMARK_REL_POS
+    global WATERMARK_SIZE
+
+    WATERMARK_SIZE = (
+        SCREEN_SIZE[0] * WATERMARK_RATIO,
+        SCREEN_SIZE[1] * WATERMARK_RATIO
+    )
+
+    WATERMARK = Image.open(WATERMARK_PATH)
+    WATERMARK.thumbnail(WATERMARK_SIZE, Image.ANTIALIAS)
+    WATERMARK_SIZE = WATERMARK.size
+
+    WATERMARK_REL_POS = (
+        int(SCREEN_SIZE[0] - WATERMARK_SIZE[0] - (1 - WATERMARK_REL_POS[0]) * SCREEN_SIZE[0]),
+        int(SCREEN_SIZE[1] - WATERMARK_SIZE[1] - (1 - WATERMARK_REL_POS[1]) * SCREEN_SIZE[1]),
+    )
+
+    PRINTER_FILTER = Image.open(PRINTER_EFFECT_FILEPATH).convert('LA')
+    # Images must have the same mode and size to be blended together.
+    PRINTER_FILTER = PRINTER_FILTER.resize(SCREEN_SIZE, Image.ANTIALIAS)
+
+    try:
+        try:
+            ser = serial.Serial(sys.argv[1], 115200)
+        except IndexError:
+            print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
+
+        # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
+        def buttonListener():
+            while 42:
+                on_button_press(
+                    {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
+                )
+
+        socketio.start_background_task(target=buttonListener)
+
+        print("Starting websocket server")
+        socketio.run(app, host=ADDR[0], port=ADDR[1])
+        # socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
+    finally:
+        try:
+            ser.close()
+        except AttributeError:
+            pass
+
 
 if __name__ == '__main__':
     # ADDR = ('127.0.0.1', 54321)
@@ -351,29 +416,19 @@ if __name__ == '__main__':
 
     THICKNESS = 1
 
-    COPIER_FILTER_ALPHA = .3
-    WATERMARK_RATIO = 1 / 3
-    WATERMARK_REL_POS = (.9, .9)
+    ##### FESSOMATON Settings
 
-    try:
-        try:
-            ser = serial.Serial(sys.argv[1], 115200)
-            # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
-            def buttonListener():
-                while 42:
-                    on_button_press(
-                        {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
-                    )
+    SCREEN_SIZE = (768, 1024)
 
-            socketio.start_background_task(target=buttonListener)
-        except IndexError:
-            print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
+    COPIER_FILTER_ALPHA = .5
+    WATERMARK_RATIO = 1/3
+    WATERMARK_REL_POS = (.92, .97)
 
-        print("Starting websocket server")
-        socketio.run(app, host=ADDR[0], port=ADDR[1])
-        # socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
-    finally:
-        try:
-            ser.close()
-        except AttributeError:
-            pass
+    BATCH_FOLDER = 'upload/batch/'
+    PROCESSED_FOLDER = 'upload/printed/'
+
+    PRINTER_NAME = "HP_LaserJet_1320_series"
+    WATERMARK_PATH = "watermark.png"
+    PRINTER_EFFECT_FILEPATH = "hover_1.jpg"
+
+    start_server()
