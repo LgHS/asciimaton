@@ -66,7 +66,7 @@ class Communication extends React.Component {
         self.props.removeWebcamOutput();
         self.props.setAsciimatonOutput(null);
         self._changeState(STATES.LOGO);
-      }, 3000);
+      }, 6000);
     }
   }
 

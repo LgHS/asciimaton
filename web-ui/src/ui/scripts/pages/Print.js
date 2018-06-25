@@ -35,7 +35,7 @@ class Print extends React.Component {
                   {/*contrastModifier={this.props.webcam.contrastModifier}*/}
                   {/*horizontal_crop={this.props.webcam.horizontal_crop}*/}
                   {/*vertical_crop={this.props.webcam.vertical_crop}/>*/}
-          <AsciimatonOutput />
+          <AsciimatonOutput transparency />
 
           <div className="page__text">
             <p>ça imprime !</p>
