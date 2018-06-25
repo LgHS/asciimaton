@@ -144,7 +144,7 @@ def on_webcam_processing(json):
 
         data = Image.open(io.BytesIO(new_pgm))
     else:
-        pil_image = Image.open(io.BytesIO(img)).convert('LA')
+        pil_image = Image.open(io.BytesIO(img)).convert('RGBA')
         source_w, source_h = pil_image.size
 
         hover_file = printer_filter(pil_image)
@@ -157,7 +157,6 @@ def on_webcam_processing(json):
             hover_file,
             COPIER_FILTER_ALPHA
         )
-        pil_image = pil_image.convert("1")
 
         _apply_watermark(pil_image, source_h, source_w)
 
@@ -183,7 +182,7 @@ def printer_filter(pil_image):
 
 
 def _apply_watermark(pil_image, source_h, source_w):
-    pil_image.paste(WATERMARK, WATERMARK_REL_POS)
+    pil_image.paste(WATERMARK, WATERMARK_REL_POS, WATERMARK)
 
 
 @socketio.on('led.changeState', namespace='/ui')
@@ -362,7 +361,7 @@ def start_server():
         SCREEN_SIZE[1] * WATERMARK_RATIO
     )
 
-    WATERMARK = Image.open(WATERMARK_PATH)
+    WATERMARK = Image.open(WATERMARK_PATH).convert('RGBA')
     WATERMARK.thumbnail(WATERMARK_SIZE, Image.ANTIALIAS)
     WATERMARK_SIZE = WATERMARK.size
 
@@ -371,7 +370,7 @@ def start_server():
         int(SCREEN_SIZE[1] - WATERMARK_SIZE[1] - (1 - WATERMARK_REL_POS[1]) * SCREEN_SIZE[1]),
     )
 
-    PRINTER_FILTER = Image.open(PRINTER_EFFECT_FILEPATH).convert('LA')
+    PRINTER_FILTER = Image.open(PRINTER_EFFECT_FILEPATH).convert('RGBA')
     # Images must have the same mode and size to be blended together.
     PRINTER_FILTER = PRINTER_FILTER.resize(SCREEN_SIZE, Image.ANTIALIAS)
 
@@ -434,7 +433,7 @@ if __name__ == '__main__':
     PROCESSED_FOLDER = 'upload/printed/'
 
     PRINTER_NAME = "HP_LaserJet_1320_series"
-    WATERMARK_PATH = "watermark.png"
+    WATERMARK_PATH = "watermark-2.png"
     PRINTER_EFFECT_FILEPATH = "hover_1.jpg"
 
     start_server()
