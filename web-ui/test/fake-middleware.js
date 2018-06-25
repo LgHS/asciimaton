@@ -2,14 +2,9 @@
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
-const io = require('socket.io')(server, { origins: '*:*'});
+const io = require('socket.io')(server, {origins: '*:*'});
 const colors = require('colors');
 const repl = require('repl');
-
-const replServer = repl.start({
-  prompt: "asciimaton > ",
-  useColors: true
-});
 
 const COLORS = ['red', 'green', 'blue'];
 let leds = {
@@ -23,16 +18,24 @@ app.use(express.static(__dirname + '/node_modules'));
 const uiNamespace = io.of('/ui');
 const controlNamespace = io.of('/control');
 
+let replServer;
+
+if (false) { // TODO add a cli parameter
+  replServer = repl.start({
+    prompt: "asciimaton > ",
+    useColors: true
+  });
+}
 
 /**
  * Handle UI messages
  */
-uiNamespace.on('connection', function(uiClient) {
+uiNamespace.on('connection', function (uiClient) {
   console.log('UI client connected');
   _displayButtons({});
 
   uiClient.on('led.changeState', (data) => {
-    if(COLORS.includes(data.color) && data.state) {
+    if (COLORS.includes(data.color) && data.state) {
       leds[data.color] = data.state;
       _displayButtons(leds);
     }
@@ -44,12 +47,20 @@ uiNamespace.on('connection', function(uiClient) {
 
   uiClient.on('printer.print', () => {
     console.log('Print...');
-    replServer.displayPrompt();
+    if (replServer) {
+      replServer.displayPrompt();
+
+      setTimeout(() => {
+        uiNamespace.emit('printer.isReady');
+      }, 3000);
+    }
   });
 
   uiClient.on('asciimaton.save', () => {
     console.log('Save picture on hard drive');
-    replServer.displayPrompt();
+    if (replServer) {
+      replServer.displayPrompt();
+    }
   });
 });
 
@@ -86,7 +97,7 @@ const defineReplCommands = () => {
     action(rawColor) {
       this.bufferedCommand = '';
       let color = rawColor.toLowerCase();
-      if(COLORS.includes(color)) {
+      if (COLORS.includes(color)) {
         uiNamespace.emit('button.isPressed', {color});
         console.log(`Button ${color} pressed`);
       } else {
@@ -113,17 +124,25 @@ const defineReplCommands = () => {
       let action = command[1];
 
       this.bufferedCommand = '';
-      if(filter === 'b') { filter = 'brightness'; }
-      if(filter === 'c') { filter = 'contrast'; }
-      if(filter !== 'brightness' && filter !== 'contrast') {
+      if (filter === 'b') {
+        filter = 'brightness';
+      }
+      if (filter === 'c') {
+        filter = 'contrast';
+      }
+      if (filter !== 'brightness' && filter !== 'contrast') {
         console.error(`filter ${filter} not valid`);
         this.displayPrompt();
         return;
       }
 
-      if(action === 'i') { action = 'increase'; }
-      if(action === 'd') { action = 'decrease'; }
-      if(action !== 'increase' && action !== 'decrease') {
+      if (action === 'i') {
+        action = 'increase';
+      }
+      if (action === 'd') {
+        action = 'decrease';
+      }
+      if (action !== 'increase' && action !== 'decrease') {
         console.error(`action ${action} not valid`);
         this.displayPrompt();
         return;
@@ -153,11 +172,16 @@ const _displayButtons = (colors) => {
   const red = colors.red === 'high' ? 'x' : ' ';
   const blue = colors.blue === 'high' ? 'x' : ' ';
 
-  console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
-  replServer.displayPrompt(true);
+  if (replServer) {
+    console.log('\n' + ` ${green} `.bgGreen + ' ' + ` ${red} `.bgRed + ' ' + ` ${blue} `.bgBlue);
+    replServer.displayPrompt(true);
+  }
 };
 
 // init REPL comands
-defineReplCommands();
+if (replServer) {
+  defineReplCommands();
+}
+
 // init server
 server.listen(54321, "0.0.0.0");

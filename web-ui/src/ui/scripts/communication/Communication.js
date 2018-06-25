@@ -53,16 +53,20 @@ class Communication extends React.Component {
       this.props.removeWebcamOutput();
     }
 
-    // send print signal to server
-    if (this.props.stateMachine.name === STATES.STILL && nextProps.stateMachine.name === STATES.SHARE) {
-      socket.emit('printer.print');
-    }
-
     // send share action to server
     if (this.props.stateMachine.name === STATES.SHARE && nextProps.stateMachine.name === STATES.PRINT) {
+      socket.emit('printer.print');
+
       if (nextProps.stateMachine.payload.share) {
         socket.emit('asciimaton.save');
       }
+
+      // wait and reset
+      setTimeout(() => {
+        self.props.removeWebcamOutput();
+        self.props.setAsciimatonOutput(null);
+        self._changeState(STATES.LOGO);
+      }, 3000);
     }
   }
 
@@ -97,9 +101,9 @@ class Communication extends React.Component {
     });
 
     socket.on('printer.isReady', () => {
-      self.props.removeWebcamOutput();
-      self.props.setAsciimatonOutput(null);
-      self._changeState(STATES.LOGO);
+      // self.props.removeWebcamOutput();
+      // self.props.setAsciimatonOutput(null);
+      // self._changeState(STATES.LOGO);
     });
 
     socket.on('webcam.updateFilter', (payload) => {
