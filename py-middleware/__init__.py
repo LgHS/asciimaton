@@ -147,16 +147,16 @@ def on_webcam_processing(json):
         pil_image = Image.open(io.BytesIO(img)).convert('RGBA')
         source_w, source_h = pil_image.size
 
-        hover_file = printer_filter(pil_image)
+        # hover_file = printer_filter(pil_image)
 
         # pil_image = ImageEnhance.Contrast(pil_image).enhance(1.5)
         # pil_image = ImageEnhance.Brightness(pil_image).enhance(1.5)
 
-        pil_image = Image.blend(
-            pil_image,
-            hover_file,
-            COPIER_FILTER_ALPHA
-        )
+        # pil_image = Image.blend(
+        #     pil_image,
+        #     hover_file,
+        #     COPIER_FILTER_ALPHA
+        # )
 
         _apply_watermark(pil_image, source_h, source_w)
 
@@ -379,15 +379,17 @@ def start_server():
             ser = serial.Serial(sys.argv[1], 115200)
         except IndexError:
             print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
+        except serial.serialutil.SerialException:
+            print('SerialPort not found. WHAT THE FUCK ARE YOU TRYING TO DO ?')
+        else:
+            # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
+            def buttonListener():
+                while 42:
+                    on_button_press(
+                        {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
+                    )
 
-        # subprocess.Popen(['python', 'buttonListener.py', sys.argv[1]])
-        def buttonListener():
-            while 42:
-                on_button_press(
-                    {'color': {'R': 'red', 'G': 'green', 'B': 'blue'}[ser.read(1).decode('utf-8')]}
-                )
-
-        socketio.start_background_task(target=buttonListener)
+            socketio.start_background_task(target=buttonListener)
 
         print("Starting websocket server")
         socketio.run(app, host=ADDR[0], port=ADDR[1])
