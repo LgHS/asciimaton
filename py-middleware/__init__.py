@@ -242,8 +242,7 @@ def _printer_print():
 class FakeSerial:
     @staticmethod
     def write(msg: str):
-        print("ERROR: No serial found!")
-        print("Message sent: {}".format(msg))
+        pass
 
 
 ser = FakeSerial()
