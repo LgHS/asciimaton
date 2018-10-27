@@ -149,7 +149,7 @@ def on_led_state_change(json):
 
     # states_name = {'high': 'on', 'low': 'off'}
     # print('Turning {} {}'.format(states_name[json['state']], led))
-    print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
+    # print(' '.join(['{}: {}'.format(k, v) for k,v in _LEDS.items()]))
 
     color = json['color'][0]
 
@@ -284,8 +284,8 @@ if __name__ == '__main__':
             print('ERROR: Please provide an USB to i/o on (eg: python __init__.py /dev/ttyUSB0)')
 
         print("Starting websocket server")
-        # socketio.run(app, host=ADDR[0], port=ADDR[1])
-        socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
+        socketio.run(app, host=ADDR[0], port=ADDR[1])
+        # socketio.run(app, host=ADDR[0], port=ADDR[1], debug=True)
     finally:
         try:
             ser.close()
