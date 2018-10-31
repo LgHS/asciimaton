@@ -81,20 +81,20 @@ export const STATE_MACHINE = {
     buttons: {
       green: {next: null},
       red: {next: STATES.LIVE},
-      blue: {next: STATES.SHARE}
+      blue: {next: STATES.PRINT}
     }
   },
 
-  [STATES.SHARE]: {
-    name: STATES.SHARE,
-    url: "/share",
-    leds: [COLORS.green, COLORS.red],
-    buttons: {
-      green: {next: STATES.PRINT, payload: {share: true}},
-      red: {next: STATES.PRINT, payload: {share: false}},
-      blue: {next: null}
-    }
-  },
+  // [STATES.SHARE]: {
+  //   name: STATES.SHARE,
+  //   url: "/share",
+  //   leds: [COLORS.green, COLORS.red],
+  //   buttons: {
+  //     green: {next: STATES.PRINT, payload: {share: true}},
+  //     red: {next: STATES.PRINT, payload: {share: false}},
+  //     blue: {next: null}
+  //   }
+  // },
   [STATES.PRINT]: {
     name: STATES.PRINT,
     url: "/print",
